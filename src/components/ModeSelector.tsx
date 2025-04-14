@@ -2,8 +2,8 @@ import { Space } from 'antd';
 import { HistoryOutlined, PlayCircleOutlined, ExperimentOutlined, LineChartOutlined } from '@ant-design/icons';
 
 interface ModeSelectorProps {
-  currentMode: 'trace' | 'realtime' | 'simulate' | 'optimize';
-  onModeChange: (mode: 'trace' | 'realtime' | 'simulate' | 'optimize') => void;
+  currentMode: 'realtime' | 'simulate' | 'optimize' | 'history';
+  onModeChange: (mode: 'realtime' | 'simulate' | 'optimize' | 'history') => void;
 }
 
 export default function ModeSelector({ currentMode, onModeChange }: ModeSelectorProps) {
@@ -17,12 +17,12 @@ export default function ModeSelector({ currentMode, onModeChange }: ModeSelector
       boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
     }}>
       <div
-        onClick={() => onModeChange('trace')}
+        onClick={() => onModeChange('history')}
         style={{
           padding: '8px 24px',
           borderRadius: '28px',
           cursor: 'pointer',
-          background: currentMode === 'trace' ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+          background: currentMode === 'history' ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Button, InputNumber, DatePicker } from 'antd';
-import { SettingOutlined, BulbOutlined } from '@ant-design/icons';
+import { Layout, Button, InputNumber, DatePicker, Slider } from 'antd';
+import { SettingOutlined, BulbOutlined, PlayCircleOutlined, PauseCircleOutlined, UndoOutlined, ForwardOutlined, BarChartOutlined } from '@ant-design/icons';
 import ConfigPanel from '../components/ConfigPanel';
 import DataMonitor from '../components/DataMonitor';
 import BackgroundImage from '../components/BackgroundImage';
@@ -14,11 +14,16 @@ import DoctorPerspective from '../components/realtime/DoctorPerspective';
 import ManagementPerspective from '../components/realtime/ManagementPerspective';
 import ViewSwitcher from '../components/realtime/ViewSwitcher';
 import RealtimeMonitor from '../components/RealtimeMonitor';
+import HistoryMonitor from '../components/history/HistoryMonitor';
 import dayjs from 'dayjs';
+import styled from 'styled-components';
+import HistoryDatePicker from '../components/history/HistoryDatePicker';
+import HistoryAnalyticsPanel from '../components/history/HistoryAnalyticsPanel';
 
 const { Content } = Layout;
 
-type Mode = 'trace' | 'realtime' | 'simulate' | 'optimize';
+type Mode = 'realtime' | 'simulate' | 'optimize' | 'history';
+type View = 'patient' | 'staff' | 'management';
 
 // 模拟诊室数据
 const initialRooms = [
@@ -34,11 +39,24 @@ const initialRooms = [
   { id: '10', name: '总检', status: 'active' as const }
 ];
 
+const LeftSidebar = styled.div<{ visible: boolean }>`
+  position: fixed;
+  left: 16px;
+  top: 80px;
+  z-index: 100;
+  opacity: ${props => props.visible ? 1 : 0};
+  pointer-events: ${props => props.visible ? 'auto' : 'none'};
+  transition: opacity 0.3s ease;
+`;
+
 export default function Home() {
   const [currentMode, setCurrentMode] = useState<Mode>('simulate');
   const [rooms, setRooms] = useState(initialRooms);
   const [configVisible, setConfigVisible] = useState(false);
   const [currentView, setCurrentView] = useState<'patient' | 'staff' | 'management'>('patient');
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState<dayjs.Dayjs | null>(null);
+  const [historyProgress, setHistoryProgress] = useState(0);
+  const [historyAnalyticsVisible, setHistoryAnalyticsVisible] = useState(false);
 
   useEffect(() => {
     document.title = '瑞金太仓健康管理';
@@ -77,9 +95,18 @@ export default function Home() {
     setCurrentView(view);
   };
 
+  const handleHistoryDateChange = (date: dayjs.Dayjs | null) => {
+    console.log('Selected date:', date);
+    // TODO: 处理历史数据加载
+  };
+
+  const handleHistoryDateApply = (date: dayjs.Dayjs) => {
+    setSelectedHistoryDate(date);
+  };
+
   return (
     <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
-      <Content style={{ position: 'relative' }}>
+      <Content style={{ position: 'relative', overflow: 'hidden' }}>
         {/* 顶部控制栏 */}
         <div style={{
           position: 'absolute',
@@ -93,6 +120,61 @@ export default function Home() {
           gap: '16px'
         }}>
           <ModeSelector currentMode={currentMode} onModeChange={handleModeChange} />
+          {/* 控制按钮组 */}
+          {currentMode === 'history' && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              background: 'rgba(255, 255, 255, 0.9)',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              minWidth: '360px'
+            }}>
+              {selectedHistoryDate && (
+                <div style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '4px',
+                  textAlign: 'center'
+                }}>
+                  当前回溯日期：{selectedHistoryDate.format('YYYY-MM-DD')}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button 
+                  type="primary" 
+                  icon={<PlayCircleOutlined />} 
+                  style={{ flex: 1 }}
+                  disabled={!selectedHistoryDate}
+                >
+                  回溯
+                </Button>
+                <Button 
+                  icon={<PauseCircleOutlined />} 
+                  style={{ flex: 1 }}
+                  disabled={!selectedHistoryDate}
+                >
+                  暂停
+                </Button>
+                <Button 
+                  icon={<UndoOutlined />} 
+                  style={{ flex: 1 }}
+                  disabled={!selectedHistoryDate}
+                >
+                  重置
+                </Button>
+                <Button 
+                  icon={<ForwardOutlined />} 
+                  style={{ flex: 1 }}
+                  disabled={!selectedHistoryDate}
+                >
+                  快进
+                </Button>
+              </div>
+            </div>
+          )}
           {currentMode === 'simulate' && <ConfigPanel />}
         </div>
 
@@ -241,25 +323,6 @@ export default function Home() {
           {currentMode === 'optimize' && (
             <DecisionConfig />
           )}
-          {currentMode === 'trace' && (
-            <div style={{
-              background: '#fff',
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              width: 360,
-              padding: '20px'
-            }}>
-              <h3 style={{ 
-                marginBottom: '20px',
-                fontSize: '16px',
-                fontWeight: 500,
-                color: '#1f1f1f'
-              }}>
-                历史数据追溯
-              </h3>
-              {/* Add trace mode specific content here */}
-            </div>
-          )}
         </div>
         
         {/* 右侧数据监控 */}
@@ -275,27 +338,11 @@ export default function Home() {
           <div style={{ position: 'absolute', top: 24, right: 24, zIndex: 100 }}>
             <RealtimeMonitor />
           </div>
-        ) : currentMode === 'trace' ? (
-          <div style={{
-            position: 'absolute',
-            top: 24,
-            right: 24,
-            zIndex: 1,
-            background: '#fff',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            width: 360,
-            padding: '20px'
-          }}>
-            <h3 style={{ 
-              marginBottom: '20px',
-              fontSize: '16px',
-              fontWeight: 500,
-              color: '#1f1f1f'
-            }}>
-              历史数据追溯
-            </h3>
-            {/* Add trace mode specific content here */}
+        ) : currentMode === 'history' ? (
+          <div style={{ position: 'absolute', top: 24, right: 24, zIndex: 100 }}>
+            <HistoryMonitor 
+              onShowAnalytics={() => setHistoryAnalyticsVisible(true)}
+            />
           </div>
         ) : null}
 
@@ -365,6 +412,62 @@ export default function Home() {
             onViewChange={handleViewChange} 
           />
         )}
+
+        <LeftSidebar visible={currentMode === 'history'}>
+          <HistoryDatePicker 
+            onDateChange={handleHistoryDateChange} 
+            onApplyDate={handleHistoryDateApply}
+            onSwitchToSimulate={() => handleModeChange('simulate')}
+          />
+        </LeftSidebar>
+
+        {/* 底部进度条 */}
+        {currentMode === 'history' && (
+          <div style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'rgba(255, 255, 255, 0.9)',
+            padding: '12px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',
+            zIndex: 1000
+          }}>
+            <span style={{ fontSize: '12px', color: '#666', minWidth: '40px' }}>
+              07:30
+            </span>
+            <Slider
+              value={historyProgress}
+              onChange={setHistoryProgress}
+              style={{ flex: 1 }}
+              disabled={!selectedHistoryDate}
+              tooltip={{
+                formatter: (value) => {
+                  // 计算当前时间
+                  const startMinutes = 7 * 60 + 30; // 7:30
+                  const endMinutes = 16 * 60 + 30;  // 16:30
+                  const totalMinutes = endMinutes - startMinutes;
+                  const currentMinutes = startMinutes + (totalMinutes * value / 100);
+                  const hours = Math.floor(currentMinutes / 60);
+                  const minutes = Math.floor(currentMinutes % 60);
+                  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                }
+              }}
+            />
+            <span style={{ fontSize: '12px', color: '#666', minWidth: '40px' }}>
+              16:30
+            </span>
+          </div>
+        )}
+
+        {/* 历史数据分析面板 */}
+        <HistoryAnalyticsPanel
+          visible={historyAnalyticsVisible}
+          onClose={() => setHistoryAnalyticsVisible(false)}
+        />
       </Content>
     </Layout>
   );
