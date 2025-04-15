@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Input, Button, TimePicker, Table, Select, InputNumber, App } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
@@ -6,6 +6,34 @@ import dayjs from 'dayjs';
 import styled from '@emotion/styled';
 
 const { Option } = Select;
+
+// 默认处理时间（单位：秒）
+const defaultProcessingTimes: Record<string, number> = {
+  '血检1': 120, // 2分钟
+  '血检2': 120,
+  '血检3': 120,
+  '尿检': 120, // 2分钟
+  '超声检查男1': 480, // 8分钟
+  '超声检查男2': 480,
+  '超声检查女1': 480,
+  '超声检查女2': 480,
+  '呼气试验': 120, // 2分钟
+  '心电图男': 360, // 6分钟
+  '心电图女': 360,
+  '胸片': 180, // 3分钟
+  '内科男': 240, // 4分钟
+  '内科女': 240,
+  '外科男': 300, // 5分钟
+  '外科女': 300,
+  '眼科1': 300, // 5分钟
+  '眼科2': 300,
+  '眼科3': 300,
+  '五官科': 300, // 5分钟
+  'CT检查1': 540, // 9分钟
+  'CT检查2': 540,
+  '妇科检查': 600, // 10分钟
+  '妇科超声': 480, // 8分钟
+};
 
 const TimeRangeContainer = styled.div`
   display: flex;
@@ -63,6 +91,13 @@ export default function RoomConfigPanel({ visible, onClose, roomName, staffGroup
   const [staffRequirements, setStaffRequirements] = useState<StaffRequirement[]>([
     { key: '1', staffGroup: '', count: 1 }
   ]);
+
+  // 当组件挂载或roomName改变时，设置默认处理时间
+  useEffect(() => {
+    if (roomName && defaultProcessingTimes[roomName]) {
+      setProcessingTime(defaultProcessingTimes[roomName].toString());
+    }
+  }, [roomName]);
 
   const handleAddTimeRange = () => {
     setTimeRanges([...timeRanges, { start: null, end: null }]);

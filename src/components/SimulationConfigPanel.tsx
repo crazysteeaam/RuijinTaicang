@@ -18,7 +18,7 @@ const MenuContainer = styled.div`
 
 const ConfigContent = styled.div`
   flex: 1;
-  padding: 0 24px;
+  padding: 24px;
   overflow-y: auto;
 `;
 
@@ -28,7 +28,73 @@ const FormSection = styled.div`
   h4 {
     margin-bottom: 16px;
     color: #1890ff;
+    font-size: 16px;
+    font-weight: 500;
   }
+`;
+
+const PackageTable = styled(Table)`
+  .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: 500;
+    padding: 12px 8px;
+  }
+  
+  .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+    vertical-align: top;
+  }
+
+  .ant-select {
+    .ant-select-selector {
+      padding: 4px !important;
+      min-height: 32px;
+      height: auto !important;
+      flex-wrap: wrap;
+    }
+
+    .ant-select-selection-item {
+      background: #f5f5f5;
+      border: none;
+      border-radius: 4px;
+      margin: 2px;
+      padding: 2px 8px;
+      font-size: 13px;
+      height: 24px;
+      line-height: 20px;
+      display: inline-flex;
+      align-items: center;
+      
+      .anticon-close {
+        color: #999;
+        font-size: 10px;
+        margin-left: 6px;
+        
+        &:hover {
+          color: #666;
+        }
+      }
+    }
+
+    .ant-select-selection-overflow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+  }
+`;
+
+const DeleteButton = styled(Button)`
+  color: #ff4d4f;
+  &:hover {
+    color: #ff7875;
+    background: #fff1f0;
+  }
+`;
+
+const AddPackageButton = styled(Button)`
+  margin-top: 16px;
+  border-style: dashed;
 `;
 
 interface SimulationConfigPanelProps {
@@ -391,54 +457,177 @@ const ResourceConfig = () => {
 // 业务策略配置
 const BusinessConfig = () => {
   const [packages, setPackages] = useState([
-    { key: '1', name: '基础套餐', items: [] },
-    { key: '2', name: '进阶套餐', items: [] },
-    { key: '3', name: '高端套餐', items: [] }
+    { 
+      key: '1', 
+      name: '健康一男', 
+      items: [
+        'blood', // 血检
+        'urine', // 尿检
+        'breathing', // 呼气试验
+        'ultrasound', // 腹部彩超
+        'heart', // 心电图
+        'chest', // 胸片
+        'internal_male', // 内科男
+        'surgery_male', // 外科男
+        'eye', // 眼科
+        'ent' // 五官科
+      ], 
+      price: 1745
+    },
+    { 
+      key: '2', 
+      name: '健康一女', 
+      items: [
+        'blood',
+        'urine',
+        'breathing',
+        'ultrasound',
+        'heart',
+        'chest',
+        'internal_female',
+        'surgery_female',
+        'eye',
+        'ent'
+      ], 
+      price: 1745
+    },
+    { 
+      key: '3', 
+      name: '健康二男', 
+      items: [
+        'blood',
+        'urine',
+        'ultrasound',
+        'heart',
+        'ct',
+        'breathing',
+        'internal_male',
+        'surgery_male',
+        'eye',
+        'ent'
+      ], 
+      price: 2810
+    },
+    { 
+      key: '4', 
+      name: '健康二女', 
+      items: [
+        'blood',
+        'urine',
+        'ultrasound',
+        'heart',
+        'ct',
+        'breathing',
+        'internal_female',
+        'surgery_female',
+        'eye',
+        'ent'
+      ], 
+      price: 2810
+    },
+    { 
+      key: '5', 
+      name: '深度男', 
+      items: [
+        'blood',
+        'urine',
+        'ultrasound',
+        'heart',
+        'ct',
+        'breathing',
+        'internal_male',
+        'surgery_male',
+        'eye',
+        'ent'
+      ], 
+      price: 5855
+    },
+    { 
+      key: '6', 
+      name: '深度女', 
+      items: [
+        'blood',
+        'urine',
+        'ultrasound_special',
+        'gynecology_ultrasound',
+        'heart',
+        'ct',
+        'gynecology_exam',
+        'breathing',
+        'internal_female',
+        'surgery_female',
+        'eye',
+        'ent'
+      ], 
+      price: 6689
+    }
   ]);
 
   const handleAddPackage = () => {
     const newKey = String(packages.length + 1);
-    setPackages([...packages, { key: newKey, name: '', items: [] }]);
+    setPackages([...packages, { key: newKey, name: '', items: [], price: 0 }]);
   };
 
   const handleRemovePackage = (key: string) => {
     setPackages(packages.filter(pkg => pkg.key !== key));
   };
 
-  const handlePackageChange = (key: string, field: 'name' | 'items', value: string | string[]) => {
+  const handlePackageChange = (key: string, field: 'name' | 'items' | 'price', value: string | string[] | number) => {
     setPackages(packages.map(pkg =>
       pkg.key === key ? { ...pkg, [field]: value } : pkg
     ));
   };
 
   const examItems = [
-    { label: '血常规', value: 'blood' },
-    { label: '生化检验', value: 'biochemical' },
-    { label: '心电图', value: 'heart' },
-    { label: '超声', value: 'ultrasound' },
-    { label: 'CT', value: 'ct' },
-    { label: 'DR', value: 'dr' },
-    { label: '内科', value: 'internal' },
-    { label: '外科', value: 'surgery' },
-    { label: '眼科', value: 'eye' },
-    { label: '总检', value: 'final' }
+    { label: '血检', value: 'blood', group: '检验' },
+    { label: '尿检', value: 'urine', group: '检验' },
+    { label: '呼气试验', value: 'breathing', group: '检验' },
+    { label: '腹部彩超', value: 'ultrasound', group: '影像' },
+    { label: '超声检查', value: 'ultrasound_special', group: '影像' },
+    { label: '妇科超声', value: 'gynecology_ultrasound', group: '影像' },
+    { label: '心电图', value: 'heart', group: '影像' },
+    { label: '胸片', value: 'chest', group: '影像' },
+    { label: 'CT检查', value: 'ct', group: '影像' },
+    { label: '内科男', value: 'internal_male', group: '临床' },
+    { label: '内科女', value: 'internal_female', group: '临床' },
+    { label: '外科男', value: 'surgery_male', group: '临床' },
+    { label: '外科女', value: 'surgery_female', group: '临床' },
+    { label: '眼科', value: 'eye', group: '临床' },
+    { label: '五官科', value: 'ent', group: '临床' },
+    { label: '妇科检查', value: 'gynecology_exam', group: '临床' }
   ];
+
+  // 按组分类项目
+  const groupedExamItems = examItems.reduce((groups, item) => {
+    const group = groups.find(g => g.label === item.group);
+    if (group) {
+      group.options.push({ label: item.label, value: item.value });
+    } else {
+      groups.push({
+        label: item.group,
+        options: [{ label: item.label, value: item.value }]
+      });
+    }
+    return groups;
+  }, [] as { label: string; options: { label: string; value: string; }[] }[]);
 
   return (
     <div>
       <FormSection>
         <h4>套餐设置</h4>
-        <Table
-          size="small"
+        <PackageTable
+          size="middle"
           columns={[
             { 
               title: '套餐名称',
               dataIndex: 'name',
+              width: 140,
               render: (value: string, record: any) => (
                 <Input
                   value={value}
                   onChange={(e) => handlePackageChange(record.key, 'name', e.target.value)}
                   placeholder="输入套餐名称"
+                  style={{ width: '100%' }}
                 />
               )
             },
@@ -452,19 +641,40 @@ const BusinessConfig = () => {
                   placeholder="选择检查项目"
                   value={value}
                   onChange={(value) => handlePackageChange(record.key, 'items', value)}
-                  options={examItems}
+                  options={groupedExamItems}
+                  maxTagCount={10}
+                  menuItemSelectedIcon={null}
+                  optionFilterProp="label"
+                  listHeight={320}
+                  popupClassName="package-items-dropdown"
+                />
+              )
+            },
+            { 
+              title: '套餐价格',
+              dataIndex: 'price',
+              width: 120,
+              render: (value: number, record: any) => (
+                <InputNumber
+                  value={value}
+                  onChange={(value) => handlePackageChange(record.key, 'price', value || 0)}
+                  placeholder="输入价格"
+                  min={0}
+                  step={100}
+                  addonAfter="元"
+                  style={{ width: '100%' }}
                 />
               )
             },
             {
               title: '操作',
               key: 'action',
+              width: 60,
               render: (_: any, record: any) => (
-                <Button
+                <DeleteButton
                   type="text"
                   icon={<DeleteOutlined />}
                   onClick={() => handleRemovePackage(record.key)}
-                  danger
                   disabled={packages.length === 1}
                 />
               )
@@ -473,11 +683,9 @@ const BusinessConfig = () => {
           dataSource={packages}
           pagination={false}
         />
-        <div style={{ marginTop: 16 }}>
-          <Button type="dashed" block icon={<PlusOutlined />} onClick={handleAddPackage}>
-            添加套餐
-          </Button>
-        </div>
+        <AddPackageButton type="dashed" block icon={<PlusOutlined />} onClick={handleAddPackage}>
+          添加套餐
+        </AddPackageButton>
       </FormSection>
 
       <FormSection>

@@ -68,7 +68,7 @@ const QuickSelectButton = styled(Button)`
 interface HistoryDatePickerProps {
   onDateChange?: (date: Dayjs | null) => void;
   onApplyDate?: (date: Dayjs) => void;
-  onSwitchToSimulate?: () => void;
+  onSwitchToSimulate?: (date: Dayjs) => void;
 }
 
 export default function HistoryDatePicker({ onDateChange, onApplyDate, onSwitchToSimulate }: HistoryDatePickerProps) {
@@ -102,8 +102,12 @@ export default function HistoryDatePicker({ onDateChange, onApplyDate, onSwitchT
   };
 
   const handleSync = () => {
-    message.success('已同步参数到推演模式');
-    onSwitchToSimulate?.();
+    if (selectedDate) {
+      console.log('HistoryDatePicker - handleSync - selectedDate:', selectedDate.format('YYYY-MM-DD HH:mm:ss'));
+      onSwitchToSimulate?.(selectedDate);
+    } else {
+      message.error('请先选择并应用历史日期');
+    }
   };
 
   return (
@@ -166,6 +170,7 @@ export default function HistoryDatePicker({ onDateChange, onApplyDate, onSwitchT
             icon={<SyncOutlined />}
             style={{ width: '100%', height: 40 }}
             onClick={handleSync}
+            disabled={!isApplied}
           >
             同步到推演模式参数
           </Button>

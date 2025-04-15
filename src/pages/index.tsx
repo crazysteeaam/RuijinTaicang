@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Button, InputNumber, DatePicker, Slider } from 'antd';
-import { SettingOutlined, BulbOutlined, PlayCircleOutlined, PauseCircleOutlined, UndoOutlined, ForwardOutlined, BarChartOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout, Button, InputNumber, DatePicker, Slider, message } from 'antd';
+import { SettingOutlined, BulbOutlined, PlayCircleOutlined, PauseCircleOutlined, UndoOutlined, ForwardOutlined } from '@ant-design/icons';
 import ConfigPanel from '../components/ConfigPanel';
 import DataMonitor from '../components/DataMonitor';
 import BackgroundImage from '../components/BackgroundImage';
@@ -19,25 +19,83 @@ import dayjs from 'dayjs';
 import styled from 'styled-components';
 import HistoryDatePicker from '../components/history/HistoryDatePicker';
 import HistoryAnalyticsPanel from '../components/history/HistoryAnalyticsPanel';
+import TemplateConfig from '../components/TemplateConfig';
 
 const { Content } = Layout;
 
 type Mode = 'realtime' | 'simulate' | 'optimize' | 'history';
-type View = 'patient' | 'staff' | 'management';
+type ViewType = 'patient' | 'staff' | 'management';
+
+type Room = {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive';
+};
 
 // 模拟诊室数据
-const initialRooms = [
-  { id: '1', name: '血常规', status: 'active' as const },
-  { id: '2', name: '生化检验', status: 'inactive' as const },
-  { id: '3', name: '心电图', status: 'active' as const },
-  { id: '4', name: '超声', status: 'active' as const },
-  { id: '5', name: 'CT室', status: 'active' as const },
-  { id: '6', name: 'DR室', status: 'active' as const },
-  { id: '7', name: '内科', status: 'active' as const },
-  { id: '8', name: '外科', status: 'active' as const },
-  { id: '9', name: '眼科', status: 'active' as const },
-  { id: '10', name: '总检', status: 'active' as const }
+const initialRooms: Room[] = [
+  { id: 'blood_1', name: '血检1', status: 'active' },
+  { id: 'blood_2', name: '血检2', status: 'active' },
+  { id: 'blood_3', name: '血检3', status: 'active' },
+  { id: 'urine_1', name: '尿检', status: 'active' },
+  { id: 'ultrasound_male_1', name: '超声检查男1', status: 'active' },
+  { id: 'ultrasound_male_2', name: '超声检查男2', status: 'active' },
+  { id: 'ultrasound_female_1', name: '超声检查女1', status: 'active' },
+  { id: 'ultrasound_female_2', name: '超声检查女2', status: 'active' },
+  { id: 'breathing_1', name: '呼气试验', status: 'active' },
+  { id: 'ecg_male_1', name: '心电图男', status: 'active' },
+  { id: 'ecg_female_1', name: '心电图女', status: 'active' },
+  { id: 'chest_1', name: '胸片', status: 'active' },
+  { id: 'internal_male_1', name: '内科男', status: 'active' },
+  { id: 'internal_female_1', name: '内科女', status: 'active' },
+  { id: 'surgery_male_1', name: '外科男', status: 'active' },
+  { id: 'surgery_female_1', name: '外科女', status: 'active' },
+  { id: 'eye_1', name: '眼科1', status: 'active' },
+  { id: 'eye_2', name: '眼科2', status: 'active' },
+  { id: 'eye_3', name: '眼科3', status: 'active' },
+  { id: 'ent_1', name: '五官科', status: 'active' },
+  { id: 'ct_1', name: 'CT检查1', status: 'active' },
+  { id: 'ct_2', name: 'CT检查2', status: 'active' },
+  { id: 'gynecology_1', name: '妇科检查', status: 'active' },
+  { id: 'gynecology_us_1', name: '妇科超声', status: 'active' }
 ];
+
+const defaultPositions = {
+  'blood_1': { x: 100, y: 50 },
+  'blood_2': { x: 300, y: 50 },
+  'blood_3': { x: 500, y: 50 },
+  
+  // 检查区域第一排
+  'urine_1': { x: 100, y: 150 },
+  'ultrasound_male_1': { x: 300, y: 150 },
+  'ultrasound_male_2': { x: 500, y: 150 },
+  'ultrasound_female_1': { x: 700, y: 150 },
+  'ultrasound_female_2': { x: 900, y: 150 },
+  
+  // 检查区域第二排
+  'breathing_1': { x: 100, y: 250 },
+  'ecg_male_1': { x: 300, y: 250 },
+  'ecg_female_1': { x: 500, y: 250 },
+  'chest_1': { x: 700, y: 250 },
+  'ct_1': { x: 900, y: 250 },
+  
+  // 诊室区域第一排
+  'internal_male_1': { x: 100, y: 350 },
+  'internal_female_1': { x: 300, y: 350 },
+  'surgery_male_1': { x: 500, y: 350 },
+  'surgery_female_1': { x: 700, y: 350 },
+  'ct_2': { x: 900, y: 350 },
+  
+  // 诊室区域第二排
+  'eye_1': { x: 100, y: 450 },
+  'eye_2': { x: 300, y: 450 },
+  'eye_3': { x: 500, y: 450 },
+  'ent_1': { x: 700, y: 450 },
+  
+  // 妇科区域
+  'gynecology_1': { x: 100, y: 550 },
+  'gynecology_us_1': { x: 300, y: 550 }, // 总检
+};
 
 const LeftSidebar = styled.div<{ visible: boolean }>`
   position: fixed;
@@ -51,12 +109,18 @@ const LeftSidebar = styled.div<{ visible: boolean }>`
 
 export default function Home() {
   const [currentMode, setCurrentMode] = useState<Mode>('simulate');
-  const [rooms, setRooms] = useState(initialRooms);
+  const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [configVisible, setConfigVisible] = useState(false);
-  const [currentView, setCurrentView] = useState<'patient' | 'staff' | 'management'>('patient');
+  const [currentView, setCurrentView] = useState<ViewType>('patient');
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<dayjs.Dayjs | null>(null);
   const [historyProgress, setHistoryProgress] = useState(0);
   const [historyAnalyticsVisible, setHistoryAnalyticsVisible] = useState(false);
+  const [simulationConfig, setSimulationConfig] = useState({
+    speed: 1000,
+    startTime: '2024-04-25 16:00:12',
+    duration: 24000
+  });
+  const templateConfigRef = useRef<React.ElementRef<typeof TemplateConfig>>(null);
 
   useEffect(() => {
     document.title = '瑞金太仓健康管理';
@@ -67,17 +131,22 @@ export default function Home() {
   };
 
   const handleRoomStatusChange = (roomId: string, newStatus: 'active' | 'inactive') => {
-    setRooms(rooms.map(room => 
+    console.log('Changing status for room:', roomId, 'to:', newStatus);
+    setRooms(prevRooms => prevRooms.map(room => 
       room.id === roomId ? { ...room, status: newStatus } : room
     ));
   };
 
   const handleRoomSwap = (roomId1: string, roomId2: string) => {
+    console.log('Swapping rooms:', roomId1, roomId2);
     setRooms(prevRooms => {
       const room1 = prevRooms.find(r => r.id === roomId1);
       const room2 = prevRooms.find(r => r.id === roomId2);
       
-      if (!room1 || !room2) return prevRooms;
+      if (!room1 || !room2) {
+        console.warn('Room not found:', !room1 ? roomId1 : roomId2);
+        return prevRooms;
+      }
 
       return prevRooms.map(room => {
         if (room.id === roomId1) {
@@ -102,6 +171,55 @@ export default function Home() {
 
   const handleHistoryDateApply = (date: dayjs.Dayjs) => {
     setSelectedHistoryDate(date);
+  };
+
+  const handleHistorySync = (date: dayjs.Dayjs) => {
+    console.log('handleHistorySync - start with date:', date.format('YYYY-MM-DD HH:mm:ss'));
+    
+    if (!templateConfigRef.current) {
+      console.error('handleHistorySync - templateConfigRef is not available');
+      message.error('模版配置组件未初始化');
+      return;
+    }
+
+    // 更新模拟配置
+    const newConfig = {
+      speed: 1000,
+      startTime: date.format('YYYY-MM-DD HH:mm:ss'),
+      duration: 28800 // 默认8小时
+    };
+    console.log('handleHistorySync - created newConfig:', newConfig);
+
+    try {
+      // 创建模版
+      console.log('handleHistorySync - attempting to create template...');
+      const templateName = templateConfigRef.current.addTemplateFromHistory(
+        date.format('YYYY-MM-DD'),
+        newConfig
+      );
+      console.log('handleHistorySync - template creation result:', templateName);
+
+      if (templateName) {
+        // 更新配置并切换到推演模式
+        setSimulationConfig(newConfig);
+        console.log('handleHistorySync - updated simulation config');
+        
+        setCurrentMode('simulate');
+        console.log('handleHistorySync - switched to simulate mode');
+        
+        message.success(`已同步参数到推演模式并应用模版：${templateName}`);
+      } else {
+        console.error('handleHistorySync - template creation returned null');
+        message.error('模版创建失败');
+      }
+    } catch (error) {
+      console.error('handleHistorySync - Error during template creation:', error);
+      message.error('同步参数失败');
+    }
+  };
+
+  const handleApplyTemplate = (config: typeof simulationConfig) => {
+    setSimulationConfig(config);
   };
 
   return (
@@ -170,7 +288,7 @@ export default function Home() {
                   style={{ flex: 1 }}
                   disabled={!selectedHistoryDate}
                 >
-                  快进
+                  跳过动画
                 </Button>
               </div>
             </div>
@@ -188,6 +306,15 @@ export default function Home() {
           flexDirection: 'column',
           gap: '16px'
         }}>
+          {/* 始终渲染 TemplateConfig，但使用 CSS 控制显示/隐藏 */}
+          <div style={{ display: currentMode === 'simulate' ? 'block' : 'none' }}>
+            <TemplateConfig 
+              ref={templateConfigRef}
+              currentConfig={simulationConfig}
+              onApplyTemplate={handleApplyTemplate}
+            />
+          </div>
+
           {currentMode === 'simulate' && (
             <>
               <Button 
@@ -206,6 +333,7 @@ export default function Home() {
               >
                 模拟参数配置
               </Button>
+
               <div style={{
                 background: '#fff',
                 borderRadius: '12px',
@@ -239,8 +367,8 @@ export default function Home() {
                       style={{ width: '100%' }}
                       min={1}
                       max={10000}
-                      defaultValue={1000}
-                      onChange={(value) => console.log('速度:', value)}
+                      value={simulationConfig.speed}
+                      onChange={(value) => setSimulationConfig(prev => ({ ...prev, speed: value || 1000 }))}
                     />
                   </div>
                   <div>
@@ -254,8 +382,11 @@ export default function Home() {
                     <DatePicker
                       showTime
                       style={{ width: '100%' }}
-                      defaultValue={dayjs('2024-04-25 16:00:12')}
-                      onChange={(date) => console.log('时间:', date)}
+                      value={dayjs(simulationConfig.startTime)}
+                      onChange={(date) => setSimulationConfig(prev => ({ 
+                        ...prev, 
+                        startTime: date?.format('YYYY-MM-DD HH:mm:ss') || prev.startTime 
+                      }))}
                     />
                   </div>
                   <div>
@@ -270,8 +401,8 @@ export default function Home() {
                       style={{ width: '100%' }}
                       min={1}
                       max={86400}
-                      defaultValue={24000}
-                      onChange={(value) => console.log('时长:', value)}
+                      value={simulationConfig.duration}
+                      onChange={(value) => setSimulationConfig(prev => ({ ...prev, duration: value || 24000 }))}
                     />
                   </div>
                 </div>
@@ -394,6 +525,7 @@ export default function Home() {
                 rooms={rooms}
                 onStatusChange={handleRoomStatusChange}
                 onRoomSwap={handleRoomSwap}
+                positions={defaultPositions}
               />
             </div>
           </div>
@@ -417,7 +549,9 @@ export default function Home() {
           <HistoryDatePicker 
             onDateChange={handleHistoryDateChange} 
             onApplyDate={handleHistoryDateApply}
-            onSwitchToSimulate={() => handleModeChange('simulate')}
+            onSwitchToSimulate={(date) => {
+              handleHistorySync(date);
+            }}
           />
         </LeftSidebar>
 
@@ -445,7 +579,8 @@ export default function Home() {
               style={{ flex: 1 }}
               disabled={!selectedHistoryDate}
               tooltip={{
-                formatter: (value) => {
+                formatter: (value?: number) => {
+                  if (typeof value !== 'number') return '';
                   // 计算当前时间
                   const startMinutes = 7 * 60 + 30; // 7:30
                   const endMinutes = 16 * 60 + 30;  // 16:30
