@@ -406,7 +406,7 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                <h3 style={{ 
+                {/* <h3 style={{ 
                   marginBottom: '16px',
                   fontSize: '16px',
                   fontWeight: 500,
@@ -417,8 +417,8 @@ export default function Home() {
                 }}>
                   <BulbOutlined style={{ color: '#faad14' }} />
                   经营管理化建议
-                </h3>
-                <div style={{ 
+                </h3> */}
+                {/* <div style={{ 
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '12px'
@@ -447,7 +447,7 @@ export default function Home() {
                     <strong style={{ color: '#0050b3' }}>流程优化：</strong>
                     XX诊室利用XX分钟就诊时间过长，建议进行流程优化
                   </div>
-                </div>
+                </div> */}
               </div>
             </>
           )}
