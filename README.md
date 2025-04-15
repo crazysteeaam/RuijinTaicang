@@ -1,41 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 瑞金医院太仓分院大脑仿真项目
 
-## Getting Started
+## 项目介绍
+本项目是瑞金医院太仓分院的大脑仿真系统，旨在通过3D可视化和数据展示，为医疗人员提供直观的大脑结构和功能展示平台。系统集成了多种数据可视化方案，支持3D模型展示、数据图表分析等功能。
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 项目结构
+```
+ruijin-simulation/
+├── src/                    # 源代码目录
+│   ├── components/         # 可复用组件
+│   ├── pages/             # 页面组件
+│   ├── types/             # TypeScript类型定义
+│   ├── mock/              # 模拟数据
+│   └── styles/            # 样式文件
+├── public/                # 静态资源
+├── .next/                 # Next.js构建输出
+└── node_modules/          # 项目依赖
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 技术栈
+- **前端框架**: Next.js 15.2.4
+- **UI组件库**: 
+  - Ant Design 5.24.6
+  - Ant Design Pro Components
+  - Ant Design Charts
+- **3D渲染**: 
+  - Three.js
+  - React Three Fiber
+  - React Three Drei
+- **数据可视化**:
+  - ECharts
+  - Ant Design Charts
+- **开发语言**: TypeScript
+- **样式解决方案**:
+  - Tailwind CSS
+  - Emotion
+- **工具库**:
+  - Lodash
+  - Day.js
+  - Moment.js
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## 开发环境要求
+- Node.js 18.0.0 或更高版本
+- npm 或 yarn 包管理器
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## 安装和运行
+1. 安装依赖：
+```bash
+npm install
+# 或
+yarn install
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+2. 开发环境运行：
+```bash
+npm run dev
+# 或
+yarn dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. 生产环境构建：
+```bash
+npm run build
+# 或
+yarn build
+```
 
-## Learn More
+4. 启动生产服务：
+```bash
+npm run start
+# 或
+yarn start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 主要功能
+- 3D大脑模型展示
+- 数据可视化图表
+- 交互式数据探索
+- 响应式界面设计
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+## 开发规范
+- 使用TypeScript进行开发
+- 遵循ESLint代码规范
+- 组件化开发
+- 使用Git进行版本控制
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
-# RuijinTaicang
+## 注意事项
+- 确保Node.js版本兼容性
+- 注意3D模型资源的大小和加载优化
+- 关注数据可视化的性能优化
