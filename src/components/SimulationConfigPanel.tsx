@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, Menu, Form, Input, InputNumber, TimePicker, Select, Table, Button, Slider, Space, Row, Col } from 'antd';
-import { CalendarOutlined, OrderedListOutlined, TeamOutlined, AppstoreOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Modal, Menu, Form, Input, InputNumber, Select, Table, Button, Slider } from 'antd';
+import { CalendarOutlined, OrderedListOutlined, TeamOutlined, AppstoreOutlined, PlusOutlined, DeleteOutlined, DollarOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 
 const { Option } = Select;
@@ -112,6 +112,27 @@ interface TimeSlot {
   lambda?: number;
   min?: number;
   max?: number;
+}
+
+// 定义类型
+interface StaffGroup {
+  key: string;
+  name: string;
+  count: number;
+  workTime: string[];
+}
+
+interface Package {
+  key: string;
+  name: string;
+  items: string[];
+  price: number;
+}
+
+interface ProfitRate {
+  key: string;
+  name: string;
+  rate: number;
 }
 
 // 预约信息配置
@@ -294,20 +315,10 @@ const AppointmentConfig = () => {
 // 流程参数配置
 const ProcessConfig = () => {
   const [priorityStrategy, setPriorityStrategy] = useState('queue_length');
+  const [priorityItems, setPriorityItems] = useState(['blood']); // 默认优先安排血检
   
   return (
     <div>
-      <FormSection>
-        <h4>空腹项目设置</h4>
-        <Form.Item label="空腹项目">
-          <Select mode="multiple" style={{ width: '100%' }} placeholder="选择需要空腹的项目">
-            <Option value="blood">血常规</Option>
-            <Option value="biochemical">生化检验</Option>
-            <Option value="bloodSugar">血糖</Option>
-          </Select>
-        </Form.Item>
-      </FormSection>
-
       <FormSection>
         <h4>体检顺序策略</h4>
         <Form.Item label="优先级策略">
@@ -352,7 +363,13 @@ const ProcessConfig = () => {
       <FormSection>
         <h4>特殊项目设置</h4>
         <Form.Item label="优先安排项目">
-          <Select mode="multiple" style={{ width: '100%' }} placeholder="选择需要优先安排的项目">
+          <Select 
+            mode="multiple" 
+            style={{ width: '100%' }} 
+            placeholder="选择需要优先安排的项目"
+            value={priorityItems}
+            onChange={setPriorityItems}
+          >
             <Option value="blood">血常规</Option>
             <Option value="heart">心电图</Option>
             <Option value="ct">CT</Option>
@@ -366,19 +383,19 @@ const ProcessConfig = () => {
 
 // 资源配置
 const ResourceConfig = () => {
-  const [staffGroups, setStaffGroups] = useState([
-    { key: '1', name: '医生组', count: 0 },
-    { key: '2', name: '护士组', count: 0 },
-    { key: '3', name: '技师组', count: 0 },
-    { key: '4', name: '导医组', count: 0 }
+  const [staffGroups, setStaffGroups] = useState<StaffGroup[]>([
+    { key: '1', name: '医生组', count: 12, workTime: ['morning', 'afternoon'] },
+    { key: '2', name: '护士组', count: 15, workTime: ['morning', 'afternoon'] },
+    { key: '3', name: '技师组', count: 8, workTime: ['morning', 'afternoon'] },
+    { key: '4', name: '导医组', count: 6, workTime: ['morning', 'afternoon'] }
   ]);
 
   const handleAddStaffGroup = () => {
     const newKey = String(staffGroups.length + 1);
-    setStaffGroups([...staffGroups, { key: newKey, name: '', count: 0 }]);
+    setStaffGroups([...staffGroups, { key: newKey, name: '', count: 0, workTime: [] }]);
   };
 
-  const handleStaffGroupChange = (key: string, field: 'name' | 'count', value: string | number) => {
+  const handleStaffGroupChange = (key: string, field: 'name' | 'count' | 'workTime', value: string | number | string[]) => {
     setStaffGroups(staffGroups.map(group => 
       group.key === key ? { ...group, [field]: value } : group
     ));
@@ -398,7 +415,7 @@ const ResourceConfig = () => {
             { 
               title: '人员组名称',
               dataIndex: 'name',
-              render: (value: string, record: any) => (
+              render: (value: string, record: StaffGroup) => (
                 <Input
                   value={value}
                   onChange={(e) => handleStaffGroupChange(record.key, 'name', e.target.value)}
@@ -409,7 +426,7 @@ const ResourceConfig = () => {
             { 
               title: '总人数',
               dataIndex: 'count',
-              render: (value: number, record: any) => (
+              render: (value: number, record: StaffGroup) => (
                 <InputNumber
                   min={0}
                   value={value}
@@ -420,8 +437,14 @@ const ResourceConfig = () => {
             { 
               title: '工作时间', 
               dataIndex: 'workTime',
-              render: () => (
-                <Select style={{ width: '100%' }} mode="multiple" placeholder="选择工作时间段">
+              render: (value: string[], record: StaffGroup) => (
+                <Select 
+                  style={{ width: '100%' }} 
+                  mode="multiple" 
+                  placeholder="选择工作时间段"
+                  value={value}
+                  onChange={(value) => handleStaffGroupChange(record.key, 'workTime', value)}
+                >
                   <Option value="morning">上午班（8:00-12:00）</Option>
                   <Option value="afternoon">下午班（13:00-17:00）</Option>
                   <Option value="full">全天班（8:00-17:00）</Option>
@@ -431,12 +454,11 @@ const ResourceConfig = () => {
             {
               title: '操作',
               key: 'action',
-              render: (_, record: any) => (
+              render: (_: unknown, record: StaffGroup) => (
                 <Button
                   type="text"
                   icon={<DeleteOutlined />}
                   onClick={() => handleRemoveStaffGroup(record.key)}
-                  danger
                 />
               )
             }
@@ -456,7 +478,7 @@ const ResourceConfig = () => {
 
 // 业务策略配置
 const BusinessConfig = () => {
-  const [packages, setPackages] = useState([
+  const [packages, setPackages] = useState<Package[]>([
     { 
       key: '1', 
       name: '健康一男', 
@@ -622,62 +644,74 @@ const BusinessConfig = () => {
               title: '套餐名称',
               dataIndex: 'name',
               width: 140,
-              render: (value: string, record: any) => (
-                <Input
-                  value={value}
-                  onChange={(e) => handlePackageChange(record.key, 'name', e.target.value)}
-                  placeholder="输入套餐名称"
-                  style={{ width: '100%' }}
-                />
-              )
+              render: (value: string, record: unknown) => {
+                const pkg = record as Package;
+                return (
+                  <Input
+                    value={value}
+                    onChange={(e) => handlePackageChange(pkg.key, 'name', e.target.value)}
+                    placeholder="输入套餐名称"
+                    style={{ width: '100%' }}
+                  />
+                );
+              }
             },
             { 
               title: '包含项目',
               dataIndex: 'items',
-              render: (value: string[], record: any) => (
-                <Select
-                  mode="multiple"
-                  style={{ width: '100%' }}
-                  placeholder="选择检查项目"
-                  value={value}
-                  onChange={(value) => handlePackageChange(record.key, 'items', value)}
-                  options={groupedExamItems}
-                  maxTagCount={10}
-                  menuItemSelectedIcon={null}
-                  optionFilterProp="label"
-                  listHeight={320}
-                  popupClassName="package-items-dropdown"
-                />
-              )
+              render: (value: string[], record: unknown) => {
+                const pkg = record as Package;
+                return (
+                  <Select
+                    mode="multiple"
+                    style={{ width: '100%' }}
+                    placeholder="选择检查项目"
+                    value={value}
+                    onChange={(value) => handlePackageChange(pkg.key, 'items', value)}
+                    options={groupedExamItems}
+                    maxTagCount={10}
+                    menuItemSelectedIcon={null}
+                    optionFilterProp="label"
+                    listHeight={320}
+                    popupClassName="package-items-dropdown"
+                  />
+                );
+              }
             },
             { 
               title: '套餐价格',
               dataIndex: 'price',
               width: 120,
-              render: (value: number, record: any) => (
-                <InputNumber
-                  value={value}
-                  onChange={(value) => handlePackageChange(record.key, 'price', value || 0)}
-                  placeholder="输入价格"
-                  min={0}
-                  step={100}
-                  addonAfter="元"
-                  style={{ width: '100%' }}
-                />
-              )
+              render: (value: number, record: unknown) => {
+                const pkg = record as Package;
+                return (
+                  <InputNumber
+                    value={value}
+                    onChange={(value) => handlePackageChange(pkg.key, 'price', value || 0)}
+                    placeholder="输入价格"
+                    min={0}
+                    step={100}
+                    addonAfter="元"
+                    style={{ width: '100%' }}
+                  />
+                );
+              }
             },
             {
               title: '操作',
               key: 'action',
               width: 60,
-              render: (_: any, record: any) => (
-                <DeleteButton
-                  type="text"
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleRemovePackage(record.key)}
-                  disabled={packages.length === 1}
-                />
-              )
+              render: (_: unknown, record: unknown) => {
+                const pkg = record as Package;
+                return (
+                  <DeleteButton
+                    type="text"
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleRemovePackage(pkg.key)}
+                    disabled={packages.length === 1}
+                  />
+                );
+              }
             }
           ]}
           dataSource={packages}
@@ -687,15 +721,93 @@ const BusinessConfig = () => {
           添加套餐
         </AddPackageButton>
       </FormSection>
+    </div>
+  );
+};
+
+// 成本参数配置
+const CostConfig = () => {
+  const [fixedCost, setFixedCost] = useState(0.5); // 每分钟基础设施成本（元）
+  
+  // 各个检查项目的利润率配置
+  const [profitRates, setProfitRates] = useState<ProfitRate[]>([
+    { key: 'blood', name: '血检', rate: 30 },
+    { key: 'urine', name: '尿检', rate: 25 },
+    { key: 'breathing', name: '呼气试验', rate: 35 },
+    { key: 'ultrasound', name: '腹部彩超', rate: 40 },
+    { key: 'ultrasound_special', name: '超声检查', rate: 40 },
+    { key: 'gynecology_ultrasound', name: '妇科超声', rate: 40 },
+    { key: 'heart', name: '心电图', rate: 35 },
+    { key: 'chest', name: '胸片', rate: 30 },
+    { key: 'ct', name: 'CT检查', rate: 45 },
+    { key: 'internal_male', name: '内科男', rate: 20 },
+    { key: 'internal_female', name: '内科女', rate: 20 },
+    { key: 'surgery_male', name: '外科男', rate: 20 },
+    { key: 'surgery_female', name: '外科女', rate: 20 },
+    { key: 'eye', name: '眼科', rate: 25 },
+    { key: 'ent', name: '五官科', rate: 25 },
+    { key: 'gynecology_exam', name: '妇科检查', rate: 30 }
+  ]);
+
+  const handleProfitRateChange = (key: string, value: number) => {
+    setProfitRates(profitRates.map(item => 
+      item.key === key ? { ...item, rate: value } : item
+    ));
+  };
+
+  return (
+    <div>
+      <FormSection>
+        <h4>固定成本配置</h4>
+        <Form.Item label="每分钟基础设施成本">
+          <InputNumber
+            min={0}
+            step={0.1}
+            value={fixedCost}
+            onChange={(value) => setFixedCost(value || 0)}
+            addonAfter="元/分钟"
+            style={{ width: '100%' }}
+          />
+          <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
+            说明：体检中心开门期间每分钟需要支付的基础设施成本，包括场地、设备折旧等
+          </div>
+        </Form.Item>
+      </FormSection>
 
       <FormSection>
-        <h4>动态调度策略</h4>
-        <Form.Item label="高峰期人员增幅">
-          <InputNumber addonAfter="%" style={{ width: 120 }} />
-        </Form.Item>
-        <Form.Item label="关键项目优先级">
-          <Select mode="multiple" style={{ width: '100%' }} options={examItems} />
-        </Form.Item>
+        <h4>可变成本配置</h4>
+        <div style={{ marginBottom: 16, color: '#666', fontSize: 14 }}>
+          配置各个检查项目的利润率（百分比）
+        </div>
+        <Table
+          size="small"
+          columns={[
+            { 
+              title: '检查项目',
+              dataIndex: 'name',
+              width: 120
+            },
+            { 
+              title: '利润率',
+              dataIndex: 'rate',
+              render: (value: number, record: ProfitRate) => (
+                <InputNumber
+                  min={0}
+                  max={100}
+                  value={value}
+                  onChange={(value) => handleProfitRateChange(record.key, value || 0)}
+                  addonAfter="%"
+                  style={{ width: '100%' }}
+                />
+              )
+            }
+          ]}
+          dataSource={profitRates}
+          pagination={false}
+        />
+        <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
+          说明：各检查项目的利润率，用于计算可变成本。利润率 = (收入 - 成本) / 收入 × 100%
+        </div>
       </FormSection>
     </div>
   );
@@ -724,6 +836,11 @@ export default function SimulationConfigPanel({ visible, onClose }: SimulationCo
       key: '4',
       icon: <AppstoreOutlined />,
       label: '业务策略',
+    },
+    {
+      key: '5',
+      icon: <DollarOutlined />,
+      label: '成本参数',
     }
   ];
 
@@ -737,6 +854,8 @@ export default function SimulationConfigPanel({ visible, onClose }: SimulationCo
         return <ResourceConfig />;
       case '4':
         return <BusinessConfig />;
+      case '5':
+        return <CostConfig />;
       default:
         return null;
     }
