@@ -102,7 +102,7 @@ export default function AnalyticsPanel({ visible, onClose }: AnalyticsPanelProps
 
   return (
     <Drawer
-      title="体检中心数据分析"
+      title="健康管理中心数据分析"
       placement="right"
       width="80vw"
       onClose={onClose}

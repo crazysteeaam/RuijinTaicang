@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { RightOutlined } from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
 
 const Container = styled.div`
   width: 480px;
+  min-width: 480px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
+  right: -20px;
 
   .data-cards {
     display: grid;
@@ -162,6 +165,50 @@ const UtilizationCard = styled(StyledCard)`
   }
 `;
 
+const RecommendationCard = styled(StyledCard)`
+  h3 {
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .recommendation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .recommendation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    
+    .icon {
+      color: #1890ff;
+      font-size: 16px;
+      margin-top: 4px;
+    }
+    
+    .content {
+      flex: 1;
+      
+      .title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f1f1f;
+        margin-bottom: 4px;
+      }
+      
+      .description {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.5;
+      }
+    }
+  }
+`;
+
 const MoreButton = styled.button`
   width: 100%;
   padding: 12px;
@@ -191,7 +238,18 @@ interface TooltipParams {
   data: [number, number];
 }
 
-export default function DecisionMonitor() {
+interface DecisionMonitorProps {
+  theme?: 'room_optimization' | 'package_optimization';
+}
+
+export default function DecisionMonitor({ theme = 'room_optimization' }: DecisionMonitorProps) {
+  const [currentTheme, setCurrentTheme] = useState<'room_optimization' | 'package_optimization'>(theme);
+  
+  // 当主题属性变化时更新状态
+  useEffect(() => {
+    setCurrentTheme(theme);
+  }, [theme]);
+
   const scatterOption = {
     grid: {
       top: 20,
@@ -302,10 +360,45 @@ export default function DecisionMonitor() {
     }
   };
 
+  // 根据主题获取不同的决策建议
+  const getRecommendations = () => {
+    if (currentTheme === 'room_optimization') {
+      return [
+        {
+          title: '诊室数量优化建议',
+          description: '心电图室：4间 (+1)、超声室：3间 (+1)、CT室：2间 (维持)、DR室：2间 (维持)、内科诊室：5间 (+1)、外科诊室：3间 (维持)、眼科诊室：2间 (维持)'
+        },
+        {
+          title: '高负载诊室调整',
+          description: '心电图室 (95% → 75%)：建议在10:00-14:00增开1间；超声室 (88% → 70%)：建议在9:00-11:00增开1间'
+        },
+        {
+          title: '低负载诊室建议',
+          description: 'DR室 (45%)：建议合并使用时段；眼科诊室 (55%)：建议调整为2间，将富余资源用于扩充心电图室'
+        }
+      ];
+    } else {
+      return [
+        {
+          title: '套餐数量优化建议',
+          description: '健康一男：85人 (+25)、健康一女：90人 (+20)、健康二男：45人 (+5)、健康二女：40人 (-5)、深度男：25人 (维持)、深度女：20人 (-5)'
+        },
+        {
+          title: '高需求套餐扩充',
+          description: '健康一男套餐：建议增加至85人/天，预计提升利润率3.2%；健康一女套餐：建议增加至90人/天，预计提升利润率2.8%'
+        },
+        {
+          title: '低效套餐调整',
+          description: '深度女套餐：建议减少5人/天，将资源转向健康一类套餐；健康二女套餐：建议减少5人/天，优化科室使用时间分布'
+        }
+      ];
+    }
+  };
+
   return (
     <Container>
       <TimeCard>
-        <h2>体检中心结束时间</h2>
+        <h2>健康管理中心结束时间</h2>
         <div>
           <span className="time">13:32:00</span>
           <span className="note">↓ 4小时50分</span>
@@ -322,11 +415,11 @@ export default function DecisionMonitor() {
           </div>
         </DataCard>
         <DataCard>
-          <div className="label">当前等待人数</div>
+          <div className="label">利润率提升指标</div>
           <div>
-            <span className="value">229</span>
-            <span className="unit">人</span>
-            <span className="change up">↑ 40</span>
+            <span className="value">15.8</span>
+            <span className="unit">%</span>
+            <span className="change up">↑ 2.3</span>
           </div>
         </DataCard>
       </div>
@@ -339,101 +432,118 @@ export default function DecisionMonitor() {
         />
       </ProcessCard>
 
-      <WaitTimeCard>
-        <h3>平均等待时间变化</h3>
-        <div className="time-grid">
-          <div className="time-item">
-            <div className="label">套餐一男</div>
-            <div className="value">
-              13:32:04
-              <span className="change down">↓</span>
+      {currentTheme === 'room_optimization' ? (
+        <UtilizationCard>
+          <h3>利用率变化</h3>
+          <div className="util-grid">
+            <div className="util-item">
+              <div className="label">心电图</div>
+              <div className="value">
+                89.2%
+                <span className="change down">↓</span>
+              </div>
+            </div>
+            <div className="util-item">
+              <div className="label">超声波检查</div>
+              <div className="value">
+                89.2%
+                <span className="change down">↓</span>
+              </div>
+            </div>
+            <div className="util-item">
+              <div className="label">CT检查</div>
+              <div className="value">
+                70.2%
+                <span className="change down">↓</span>
+              </div>
+            </div>
+            <div className="util-item">
+              <div className="label">血检</div>
+              <div className="value">
+                70.2%
+                <span className="change up">↑</span>
+              </div>
+            </div>
+            <div className="util-item">
+              <div className="label">内科男</div>
+              <div className="value">
+                80.2%
+                <span className="change up">↑</span>
+              </div>
+            </div>
+            <div className="util-item">
+              <div className="label">内科女</div>
+              <div className="value">
+                80.2%
+                <span className="change up">↑</span>
+              </div>
             </div>
           </div>
-          <div className="time-item">
-            <div className="label">套餐二女</div>
-            <div className="value">
-              14:32:04
-              <span className="change down">↓</span>
+        </UtilizationCard>
+      ) : (
+        <WaitTimeCard>
+          <h3>平均等待时间变化</h3>
+          <div className="time-grid">
+            <div className="time-item">
+              <div className="label">套餐一男</div>
+              <div className="value">
+                13:32:04
+                <span className="change down">↓</span>
+              </div>
+            </div>
+            <div className="time-item">
+              <div className="label">套餐一女</div>
+              <div className="value">
+                14:32:04
+                <span className="change down">↓</span>
+              </div>
+            </div>
+            <div className="time-item">
+              <div className="label">套餐二男</div>
+              <div className="value">
+                16:32:04
+                <span className="change down">↓</span>
+              </div>
+            </div>
+            <div className="time-item">
+              <div className="label">套餐二女</div>
+              <div className="value">
+                14:32:04
+                <span className="change up">↑</span>
+              </div>
+            </div>
+            <div className="time-item">
+              <div className="label">套餐三男</div>
+              <div className="value">
+                14:32:04
+                <span className="change up">↑</span>
+              </div>
+            </div>
+            <div className="time-item">
+              <div className="label">套餐三女</div>
+              <div className="value">
+                16:32:04
+                <span className="change up">↑</span>
+              </div>
             </div>
           </div>
-          <div className="time-item">
-            <div className="label">套餐二男</div>
-            <div className="value">
-              16:32:04
-              <span className="change down">↓</span>
-            </div>
-          </div>
-          <div className="time-item">
-            <div className="label">套餐二女</div>
-            <div className="value">
-              14:32:04
-              <span className="change up">↑</span>
-            </div>
-          </div>
-          <div className="time-item">
-            <div className="label">套餐二女</div>
-            <div className="value">
-              14:32:04
-              <span className="change up">↑</span>
-            </div>
-          </div>
-          <div className="time-item">
-            <div className="label">套餐二男</div>
-            <div className="value">
-              16:32:04
-              <span className="change up">↑</span>
-            </div>
-          </div>
-        </div>
-      </WaitTimeCard>
+        </WaitTimeCard>
+      )}
 
-      <UtilizationCard>
-        <h3>利用率变化</h3>
-        <div className="util-grid">
-          <div className="util-item">
-            <div className="label">心电图</div>
-            <div className="value">
-              89.2%
-              <span className="change down">↓</span>
+      <RecommendationCard>
+        <h3>决策建议</h3>
+        <div className="recommendation-list">
+          {getRecommendations().map((rec, index) => (
+            <div className="recommendation-item" key={index}>
+              <div className="icon">•</div>
+              <div className="content">
+                <div className="title">{rec.title}</div>
+                <div className="description">{rec.description}</div>
+              </div>
             </div>
-          </div>
-          <div className="util-item">
-            <div className="label">超声波检查</div>
-            <div className="value">
-              89.2%
-              <span className="change down">↓</span>
-            </div>
-          </div>
-          <div className="util-item">
-            <div className="label">CT检查</div>
-            <div className="value">
-              70.2%
-              <span className="change down">↓</span>
-            </div>
-          </div>
-          <div className="util-item">
-            <div className="label">血检</div>
-            <div className="value">
-              70.2%
-              <span className="change up">↑</span>
-            </div>
-          </div>
-          <div className="util-item">
-            <div className="label">内科男</div>
-            <div className="value">
-              80.2%
-              <span className="change up">↑</span>
-            </div>
-          </div>
-          <div className="util-item">
-            <div className="label">内科女</div>
-            <div className="value">
-              80.2%
-              <span className="change up">↑</span>
-            </div>
-          </div>
+          ))}
         </div>
-      </UtilizationCard>
+      </RecommendationCard>
 
       <MoreButton>
         更多数据详情

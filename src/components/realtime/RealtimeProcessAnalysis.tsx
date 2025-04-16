@@ -41,15 +41,14 @@ interface ProcessAnalysisProps {
   dateRange?: [Date | null, Date | null];
 }
 
-export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
+export default function RealtimeProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
   // 关键指标数据
   const metrics = {
-    processingRate: 120,
-    waitingCount: 225,
-    avgProcessTime: 185,
-    avgWaitTime: 32,
-    utilization: 75,
-    walkingTimeRatio: 70
+    processingRate: 8,  // 当前每分钟处理人数
+    waitingCount: 25,   // 当前等待人数
+    avgProcessTime: 45, // 当前平均处理时间
+    avgWaitTime: 15,    // 当前平均等待时间
+    utilization: 85,    // 当前系统利用率
   };
 
   // 时间分布图表配置
@@ -59,9 +58,8 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
       formatter: '{b}: {c}分钟 ({d}%)'
     },
     legend: {
-      orient: 'vertical',
-      right: 10,
-      top: 'center',
+      bottom: 0,
+      left: 'center',
       textStyle: {
         color: ANALYTICS_THEME.text.secondary
       }
@@ -70,6 +68,7 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
       {
         type: 'pie',
         radius: ['50%', '70%'],
+        center: ['50%', '45%'],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 10,
@@ -77,20 +76,15 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
           borderWidth: 2
         },
         label: {
-          show: false
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 14,
-            fontWeight: 'bold'
-          }
+          show: true,
+          position: 'outside',
+          formatter: '{b}: {c}分钟',
+          color: ANALYTICS_THEME.text.primary
         },
         data: [
-          { value: 45, name: '检查时间' },
-          { value: 32, name: '等待时间' },
-          { value: 15, name: '走路时间' },
-          { value: 8, name: '其他时间' }
+          { value: 25, name: '检查时间' },
+          { value: 15, name: '等待时间' },
+          { value: 5, name: '登记时间' }
         ]
       }
     ]
@@ -145,34 +139,45 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
     ]
   };
 
-  // 利用率图表配置
-  const utilizationChartOption = {
+  // 流程状态分析图表配置
+  const processStatusChartOption = {
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    legend: {
+      data: ['当前人数', '已完成人数', '等待人数'],
+      bottom: 0,
+      left: 'center',
+      textStyle: {
+        color: ANALYTICS_THEME.text.secondary
+      }
     },
     grid: {
       top: 30,
       right: 20,
-      bottom: 30,
+      bottom: 50,
       left: 60
     },
     xAxis: {
       type: 'category',
-      data: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+      data: ['登记', '抽血', '心电图', '超声', 'CT', '内科', '外科', '眼科', '五官科', '总检'],
       axisLabel: {
-        color: ANALYTICS_THEME.text.secondary
+        color: ANALYTICS_THEME.text.secondary,
+        interval: 0,
+        rotate: 30
       }
     },
     yAxis: {
       type: 'value',
-      name: '利用率(%)',
-      max: 100,
+      name: '人数',
       nameTextStyle: {
         color: ANALYTICS_THEME.text.secondary
       },
       axisLabel: {
-        color: ANALYTICS_THEME.text.secondary,
-        formatter: '{value}%'
+        color: ANALYTICS_THEME.text.secondary
       },
       splitLine: {
         lineStyle: {
@@ -182,32 +187,25 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
     },
     series: [
       {
-        name: '心电图',
-        type: 'line',
-        smooth: true,
-        data: [65, 75, 85, 80, 70, 75, 82, 85, 80],
-        itemStyle: { color: '#1890ff' }
+        name: '当前人数',
+        type: 'bar',
+        stack: 'total',
+        data: [15, 20, 12, 18, 8, 10, 6, 5, 4, 12],
+        itemStyle: { color: ANALYTICS_THEME.chart.primary }
       },
       {
-        name: '超声检查',
-        type: 'line',
-        smooth: true,
-        data: [60, 70, 75, 73, 65, 68, 73, 78, 75],
-        itemStyle: { color: '#52c41a' }
+        name: '已完成人数',
+        type: 'bar',
+        stack: 'total',
+        data: [85, 75, 68, 62, 52, 45, 38, 32, 28, 68],
+        itemStyle: { color: ANALYTICS_THEME.chart.success }
       },
       {
-        name: 'CT检查',
-        type: 'line',
-        smooth: true,
-        data: [55, 65, 70, 68, 60, 63, 68, 72, 70],
-        itemStyle: { color: '#faad14' }
-      },
-      {
-        name: '血检',
-        type: 'line',
-        smooth: true,
-        data: [70, 80, 90, 85, 75, 80, 88, 92, 88],
-        itemStyle: { color: '#ff4d4f' }
+        name: '等待人数',
+        type: 'bar',
+        stack: 'total',
+        data: [25, 30, 15, 22, 10, 8, 5, 4, 3, 15],
+        itemStyle: { color: ANALYTICS_THEME.chart.warning }
       }
     ]
   };
@@ -217,20 +215,20 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
       <Row gutter={16}>
         <Col span={8}>
           <MetricCard>
-            <MetricTitle>单位时间处理人数</MetricTitle>
-            <MetricValue>{metrics.processingRate}<MetricUnit>人/秒</MetricUnit></MetricValue>
+            <MetricTitle>当前处理速率</MetricTitle>
+            <MetricValue>{metrics.processingRate}<MetricUnit>人/分钟</MetricUnit></MetricValue>
           </MetricCard>
         </Col>
         <Col span={8}>
           <MetricCard>
-            <MetricTitle>平均等待人数</MetricTitle>
+            <MetricTitle>当前等待人数</MetricTitle>
             <MetricValue>{metrics.waitingCount}<MetricUnit>人</MetricUnit></MetricValue>
           </MetricCard>
         </Col>
         <Col span={8}>
           <MetricCard>
-            <MetricTitle>走路时间占比</MetricTitle>
-            <MetricValue>{metrics.walkingTimeRatio}<MetricUnit>%</MetricUnit></MetricValue>
+            <MetricTitle>当前系统利用率</MetricTitle>
+            <MetricValue>{metrics.utilization}<MetricUnit>%</MetricUnit></MetricValue>
           </MetricCard>
         </Col>
       </Row>
@@ -251,7 +249,7 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
         </Col>
         <Col span={12}>
           <Card 
-            title="各科室等待时间" 
+            title="等待时间分析" 
             style={cardStyle}
             headStyle={{
               color: ANALYTICS_THEME.text.primary,
@@ -264,10 +262,10 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
         </Col>
       </Row>
 
-      <Row gutter={16} style={{ marginTop: '16px' }}>
+      <Row gutter={16}>
         <Col span={24}>
           <Card 
-            title="科室利用率趋势" 
+            title="流程状态分析" 
             style={cardStyle}
             headStyle={{
               color: ANALYTICS_THEME.text.primary,
@@ -275,7 +273,7 @@ export default function ProcessAnalysis({ dateRange }: ProcessAnalysisProps) {
               fontWeight: 500
             }}
           >
-            <ReactECharts option={utilizationChartOption} style={{ height: '300px' }} />
+            <ReactECharts option={processStatusChartOption} style={{ height: '300px' }} />
           </Card>
         </Col>
       </Row>

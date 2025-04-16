@@ -1,5 +1,5 @@
 import { Button, Space } from 'antd';
-import { PlayCircleOutlined, PauseCircleOutlined, ReloadOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined, PauseCircleOutlined, ReloadOutlined, ForwardOutlined } from '@ant-design/icons';
 
 export default function ConfigPanel() {
   const handleSimulationControl = (action: 'start' | 'pause' | 'reset') => {
@@ -38,6 +38,12 @@ export default function ConfigPanel() {
       >
         重置
       </Button>
+      <Button 
+                  icon={<ForwardOutlined />} 
+                  style={{ flex: 1 }}
+                >
+                  跳过动画
+                </Button>
     </Space>
   );
 } 

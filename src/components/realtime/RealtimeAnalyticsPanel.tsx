@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Drawer, Tabs, theme } from 'antd';
 import type { TabsProps } from 'antd';
-import ProcessAnalysis from '../analytics/ProcessAnalysis';
-import ResourceAnalysis from '../analytics/ResourceAnalysis';
-import PeakAnalysis from '../analytics/PeakAnalysis';
-import LayoutAnalysis from '../analytics/LayoutAnalysis';
-import OperationAnalysis from '../analytics/OperationAnalysis';
+import ProcessAnalysis from './RealtimeProcessAnalysis';
+import ResourceAnalysis from './RealtimeResourceAnalysis';
+import LayoutAnalysis from './RealtimeLayoutAnalysis';
+import OperationAnalysis from './RealtimeOperationAnalysis';
 import { ANALYTICS_THEME } from '../analytics/theme';
 
 interface RealtimeAnalyticsPanelProps {
@@ -24,11 +23,6 @@ const TAB_ITEMS: TabsProps['items'] = [
     key: 'resource',
     label: '资源利用',
     children: <ResourceAnalysis dateRange={[null, null]} />
-  },
-  {
-    key: 'peak',
-    label: '高峰表现',
-    children: <PeakAnalysis dateRange={[null, null]} />
   },
   {
     key: 'layout',

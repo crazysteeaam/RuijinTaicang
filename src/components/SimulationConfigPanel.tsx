@@ -769,7 +769,7 @@ const CostConfig = () => {
             style={{ width: '100%' }}
           />
           <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
-            说明：体检中心开门期间每分钟需要支付的基础设施成本，包括场地、设备折旧等
+            说明：健康管理中心开门期间每分钟需要支付的基础设施成本，包括场地、设备折旧等
           </div>
         </Form.Item>
       </FormSection>

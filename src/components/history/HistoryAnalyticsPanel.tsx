@@ -6,6 +6,7 @@ import ResourceAnalysis from '../analytics/ResourceAnalysis';
 import PeakAnalysis from '../analytics/PeakAnalysis';
 import LayoutAnalysis from '../analytics/LayoutAnalysis';
 import OperationAnalysis from '../analytics/OperationAnalysis';
+import FinanceAnalysis from '../analytics/FinanceAnalysis';
 import { ANALYTICS_THEME } from '../analytics/theme';
 
 interface HistoryAnalyticsPanelProps {
@@ -21,25 +22,30 @@ const TAB_ITEMS: TabsProps['items'] = [
     children: <ProcessAnalysis dateRange={[null, null]} />
   },
   {
+    key: 'peak',
+    label: '高峰表现',
+    children: <PeakAnalysis dateRange={[null, null]} />
+  },
+  {
     key: 'resource',
     label: '资源利用',
     children: <ResourceAnalysis dateRange={[null, null]} />
   },
   {
-    key: 'peak',
-    label: '高峰表现',
-    children: <PeakAnalysis dateRange={[null, null]} />
+    key: 'finance',
+    label: '财务分析',
+    children: <FinanceAnalysis dateRange={[null, null]} />
   },
   {
     key: 'layout',
     label: '空间布局',
     children: <LayoutAnalysis dateRange={[null, null]} />
   },
-  {
-    key: 'operation',
-    label: '运营策略',
-    children: <OperationAnalysis />
-  }
+  // {
+  //   key: 'operation',
+  //   label: '运营策略',
+  //   children: <OperationAnalysis dateRange={[null, null]} />
+  // }
 ];
 
 export default function HistoryAnalyticsPanel({ visible, onClose }: HistoryAnalyticsPanelProps) {
@@ -73,6 +79,7 @@ export default function HistoryAnalyticsPanel({ visible, onClose }: HistoryAnaly
       <Tabs
         items={TAB_ITEMS}
         type="card"
+        defaultActiveKey="process"
         style={{
           color: ANALYTICS_THEME.text.primary,
           background: ANALYTICS_THEME.background,

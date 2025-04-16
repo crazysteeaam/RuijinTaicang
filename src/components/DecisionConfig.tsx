@@ -9,15 +9,31 @@ import DecisionMonitor from './DecisionMonitor';
 const PageLayout = styled.div`
   display: flex;
   gap: 24px;
+  width: 98vw;
+  height: 100vh;
+  padding: 24px;
+  background: transparent;
+  overflow: auto;
+  justify-content: center;
+  display: flex;
+  margin-top: 25px;
+  justify-content: space-between;
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 480px;
 `;
 
 const Container = styled.div`
-  width: 480px;
   background: white;
   border-radius: 12px;
   padding: 24px;
   color: #1f1f1f;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 480px;
 `;
 
 const TitleSection = styled.div`
@@ -414,275 +430,279 @@ const DecisionConfig: React.FC<DecisionConfigProps> = ({ onClose, onStart }) => 
 
   return (
     <PageLayout>
-      <Container>
-        <TitleSection>
-          <ConfigButton 
-            type="default"
-            icon={<SettingOutlined />}
-            onClick={() => setShowSimConfig(true)}
-          >
-            模拟参数配置
-          </ConfigButton>
-          <Title>决策全局配置选项</Title>
-          <ModeSwitchContainer>
-            <ModeSwitch
-              value={configMode}
-              onChange={(e) => setConfigMode(e.target.value)}
-              optionType="button"
-              buttonStyle="solid"
-              options={[
-                { label: '主题模式', value: 'theme' },
-                { label: '详细配置', value: 'detail' }
-              ]}
-            />
-          </ModeSwitchContainer>
-        </TitleSection>
-
-        {configMode === 'theme' ? (
-          <Section>
-            <Label>选择决策主题</Label>
-            {PRESET_THEMES.map(theme => (
-              <ThemeCard
-                key={theme.id}
-                selected={selectedTheme === theme.id}
-                onClick={() => handleThemeSelect(theme.id)}
-              >
-                <Card.Meta
-                  title={theme.name}
-                  description={
-                    <>
-                      <div>{theme.description}</div>
-                      <div style={{ marginTop: 8, color: '#1890ff' }}>
-                        目标：{theme.goals.join(' + ')}
-                      </div>
-                    </>
-                  }
-                />
-              </ThemeCard>
-            ))}
-
-            {selectedTheme && (
-              <Section>
-                <Label>主题参数配置</Label>
-                {selectedTheme === 'room_optimization' && (
-                  <Section>
-                    <Label>诊室数量配置范围</Label>
-                    <RoomConfigGrid>
-                      {PRESET_THEMES.find(t => t.id === 'room_optimization')?.defaultConfig.rooms.map((room, index) => (
-                        <RoomConfigItem key={index}>
-                          <div className="room-name">{room.name}</div>
-                          <div className="input-group">
-                            <InputNumber 
-                              min={room.range[0]} 
-                              max={room.range[1]} 
-                              defaultValue={room.range[0]} 
-                            />
-                            <span>至</span>
-                            <InputNumber 
-                              min={room.range[0]} 
-                              max={room.range[1]} 
-                              defaultValue={room.range[1]} 
-                            />
-                            <span>间</span>
-                          </div>
-                        </RoomConfigItem>
-                      ))}
-                    </RoomConfigGrid>
-                  </Section>
-                )}
-                {selectedTheme === 'package_optimization' && (
-                  <Section>
-                    <Label>套餐数量配置范围</Label>
-                    <RoomConfigGrid>
-                      {PRESET_THEMES.find(t => t.id === 'package_optimization')?.defaultConfig.packages.map((pkg, index) => (
-                        <RoomConfigItem key={index}>
-                          <div className="room-name">{pkg.name}</div>
-                          <div className="input-group">
-                            <InputNumber 
-                              min={pkg.range[0]} 
-                              max={pkg.range[1]} 
-                              defaultValue={pkg.range[0]} 
-                            />
-                            <span>至</span>
-                            <InputNumber 
-                              min={pkg.range[0]} 
-                              max={pkg.range[1]} 
-                              defaultValue={pkg.range[1]} 
-                            />
-                            <span>人</span>
-                          </div>
-                        </RoomConfigItem>
-                      ))}
-                    </RoomConfigGrid>
-                  </Section>
-                )}
-              </Section>
-            )}
-          </Section>
-        ) : (
-          <>
-            <Section>
-              <Label>开始时间</Label>
-              <DatePicker 
-                style={{ width: '100%' }} 
-                onChange={(date) => setConfig({ ...config, startTime: date })}
+      <MainContent>
+        <Container>
+          <TitleSection>
+            <ConfigButton 
+              type="default"
+              icon={<SettingOutlined />}
+              onClick={() => setShowSimConfig(true)}
+            >
+              模拟参数配置
+            </ConfigButton>
+            <Title>决策全局配置选项</Title>
+            <ModeSwitchContainer>
+              <ModeSwitch
+                value={configMode}
+                onChange={(e) => setConfigMode(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+                options={[
+                  { label: '主题模式', value: 'theme' },
+                  { label: '详细配置', value: 'detail' }
+                ]}
               />
-            </Section>
+            </ModeSwitchContainer>
+          </TitleSection>
 
+          {configMode === 'theme' ? (
             <Section>
-              <Label>决策目标 (最多选择3个)</Label>
-              <Select
-                mode="multiple"
-                style={{ width: '100%' }}
-                placeholder="请选择决策目标"
-                maxTagCount={3}
-                value={config.goals}
-                onChange={(values) => setConfig({ ...config, goals: values })}
-              >
-                <Select.Option value="wait_time">患者等待时间最短</Select.Option>
-                <Select.Option value="utilization">设备利用率最高</Select.Option>
-                <Select.Option value="profit">利润率最高</Select.Option>
-              </Select>
-            </Section>
+              <Label>选择决策主题</Label>
+              {PRESET_THEMES.map(theme => (
+                <ThemeCard
+                  key={theme.id}
+                  selected={selectedTheme === theme.id}
+                  onClick={() => handleThemeSelect(theme.id)}
+                >
+                  <Card.Meta
+                    title={theme.name}
+                    description={
+                      <>
+                        <div>{theme.description}</div>
+                        <div style={{ marginTop: 8, color: '#1890ff' }}>
+                          目标：{theme.goals.join(' + ')}
+                        </div>
+                      </>
+                    }
+                  />
+                </ThemeCard>
+              ))}
 
-            <Section>
-              <Label>可变变量配置</Label>
-              {variables.map((variable, index) => (
-                <VariableRow key={index}>
-                  <Select
-                    value={variable.type}
-                    onChange={(value) => {
-                      const newVariables = [...variables];
-                      newVariables[index].type = value;
-                      newVariables[index].name = '';
-                      setVariables(newVariables);
-                    }}
-                    options={variableTypeOptions}
-                    placeholder="选择变量类型"
-                  />
-                  <Select
-                    value={variable.name}
-                    onChange={(value) => {
-                      const newVariables = [...variables];
-                      newVariables[index].name = value;
-                      newVariables[index].unit = getUnitByType(newVariables[index].type, value);
-                      setVariables(newVariables);
-                    }}
-                    options={variableNameOptions[variable.type as keyof typeof variableNameOptions]}
-                    placeholder="选择变量名称"
-                  />
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <InputNumber
-                      value={variable.initialValue}
+              {selectedTheme && (
+                <Section>
+                  <Label>主题参数配置</Label>
+                  {selectedTheme === 'room_optimization' && (
+                    <Section>
+                      <Label>诊室数量配置范围</Label>
+                      <RoomConfigGrid>
+                        {PRESET_THEMES.find(t => t.id === 'room_optimization')?.defaultConfig.rooms.map((room, index) => (
+                          <RoomConfigItem key={index}>
+                            <div className="room-name">{room.name}</div>
+                            <div className="input-group">
+                              <InputNumber 
+                                min={room.range[0]} 
+                                max={room.range[1]} 
+                                defaultValue={room.range[0]} 
+                              />
+                              <span>至</span>
+                              <InputNumber 
+                                min={room.range[0]} 
+                                max={room.range[1]} 
+                                defaultValue={room.range[1]} 
+                              />
+                              <span>间</span>
+                            </div>
+                          </RoomConfigItem>
+                        ))}
+                      </RoomConfigGrid>
+                    </Section>
+                  )}
+                  {selectedTheme === 'package_optimization' && (
+                    <Section>
+                      <Label>套餐数量配置范围</Label>
+                      <RoomConfigGrid>
+                        {PRESET_THEMES.find(t => t.id === 'package_optimization')?.defaultConfig.packages.map((pkg, index) => (
+                          <RoomConfigItem key={index}>
+                            <div className="room-name">{pkg.name}</div>
+                            <div className="input-group">
+                              <InputNumber 
+                                min={pkg.range[0]} 
+                                max={pkg.range[1]} 
+                                defaultValue={pkg.range[0]} 
+                              />
+                              <span>至</span>
+                              <InputNumber 
+                                min={pkg.range[0]} 
+                                max={pkg.range[1]} 
+                                defaultValue={pkg.range[1]} 
+                              />
+                              <span>人</span>
+                            </div>
+                          </RoomConfigItem>
+                        ))}
+                      </RoomConfigGrid>
+                    </Section>
+                  )}
+                </Section>
+              )}
+            </Section>
+          ) : (
+            <>
+              <Section>
+                <Label>开始时间</Label>
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  onChange={(date) => setConfig({ ...config, startTime: date })}
+                />
+              </Section>
+
+              <Section>
+                <Label>决策目标 (最多选择3个)</Label>
+                <Select
+                  mode="multiple"
+                  style={{ width: '100%' }}
+                  placeholder="请选择决策目标"
+                  maxTagCount={3}
+                  value={config.goals}
+                  onChange={(values) => setConfig({ ...config, goals: values })}
+                >
+                  <Select.Option value="wait_time">患者等待时间最短</Select.Option>
+                  <Select.Option value="utilization">设备利用率最高</Select.Option>
+                  <Select.Option value="profit">利润率最高</Select.Option>
+                </Select>
+              </Section>
+
+              <Section>
+                <Label>可变变量配置</Label>
+                {variables.map((variable, index) => (
+                  <VariableRow key={index}>
+                    <Select
+                      value={variable.type}
                       onChange={(value) => {
                         const newVariables = [...variables];
-                        newVariables[index].initialValue = value || 0;
+                        newVariables[index].type = value;
+                        newVariables[index].name = '';
                         setVariables(newVariables);
                       }}
-                      placeholder="初始值"
-                      style={{ flex: 1 }}
+                      options={variableTypeOptions}
+                      placeholder="选择变量类型"
                     />
-                    {variable.unit && (
-                      <div style={{ 
-                        lineHeight: '32px', 
-                        color: '#666', 
-                        fontSize: '14px',
-                        padding: '0 8px'
-                      }}>
-                        {variable.unit}
-                      </div>
-                    )}
-                  </div>
-                  <DeleteButton
-                    type="text"
-                    icon={<SettingOutlined />}
-                    onClick={() => handleDeleteVariable(index)}
-                  />
-                </VariableRow>
-              ))}
-              <div style={{ marginTop: '12px' }}>
-                <AddButton onClick={handleAddVariable}>
-                  <SettingOutlined />
-                  添加可变变量
-                </AddButton>
-              </div>
-            </Section>
+                    <Select
+                      value={variable.name}
+                      onChange={(value) => {
+                        const newVariables = [...variables];
+                        newVariables[index].name = value;
+                        newVariables[index].unit = getUnitByType(newVariables[index].type, value);
+                        setVariables(newVariables);
+                      }}
+                      options={variableNameOptions[variable.type as keyof typeof variableNameOptions]}
+                      placeholder="选择变量名称"
+                    />
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <InputNumber
+                        value={variable.initialValue}
+                        onChange={(value) => {
+                          const newVariables = [...variables];
+                          newVariables[index].initialValue = value || 0;
+                          setVariables(newVariables);
+                        }}
+                        placeholder="初始值"
+                        style={{ flex: 1 }}
+                      />
+                      {variable.unit && (
+                        <div style={{ 
+                          lineHeight: '32px', 
+                          color: '#666', 
+                          fontSize: '14px',
+                          padding: '0 8px'
+                        }}>
+                          {variable.unit}
+                        </div>
+                      )}
+                    </div>
+                    <DeleteButton
+                      type="text"
+                      icon={<SettingOutlined />}
+                      onClick={() => handleDeleteVariable(index)}
+                    />
+                  </VariableRow>
+                ))}
+                <div style={{ marginTop: '12px' }}>
+                  <AddButton onClick={handleAddVariable}>
+                    <SettingOutlined />
+                    添加可变变量
+                  </AddButton>
+                </div>
+              </Section>
 
-            <Section>
-              <Label>约束配置</Label>
-              {constraints.map((constraint, index) => (
-                <ConstraintRow key={index}>
-                  <Select
-                    value={constraint.name}
-                    onChange={(value) => {
-                      const newConstraints = [...constraints];
-                      newConstraints[index].name = value;
-                      setConstraints(newConstraints);
-                    }}
-                    options={[
-                      { value: '健康一男数量', label: '健康一男数量' },
-                      { value: '健康一女数量', label: '健康一女数量' },
-                      { value: '健康二男数量', label: '健康二男数量' },
-                      { value: '健康二女数量', label: '健康二女数量' },
-                      { value: '深度男数量', label: '深度男数量' },
-                      { value: '深度女数量', label: '深度女数量' },
-                      { value: '结束时间', label: '结束时间' },
-                      { value: '医生工作时间', label: '医生工作时间' },
-                      { value: '设备使用率', label: '设备使用率' },
-                      { value: '科室负载', label: '科室负载' }
-                    ]}
-                  />
-                  <Select
-                    value={constraint.operator}
-                    onChange={(value) => {
-                      const newConstraints = [...constraints];
-                      newConstraints[index].operator = value;
-                      setConstraints(newConstraints);
-                    }}
-                    options={[
-                      { value: '大于', label: '大于' },
-                      { value: '小于', label: '小于' },
-                      { value: '等于', label: '等于' },
-                      { value: '早于', label: '早于' },
-                      { value: '晚于', label: '晚于' }
-                    ]}
-                  />
-                  <Input
-                    value={constraint.value}
-                    onChange={(e) => {
-                      const newConstraints = [...constraints];
-                      newConstraints[index].value = e.target.value;
-                      setConstraints(newConstraints);
-                    }}
-                  />
-                </ConstraintRow>
-              ))}
-              <div style={{ marginTop: '12px' }}>
-                <AddButton onClick={handleAddConstraint}>
-                  <SettingOutlined />
-                  添加约束配置
-                </AddButton>
-              </div>
-            </Section>
-          </>
+              <Section>
+                <Label>约束配置</Label>
+                {constraints.map((constraint, index) => (
+                  <ConstraintRow key={index}>
+                    <Select
+                      value={constraint.name}
+                      onChange={(value) => {
+                        const newConstraints = [...constraints];
+                        newConstraints[index].name = value;
+                        setConstraints(newConstraints);
+                      }}
+                      options={[
+                        { value: '健康一男数量', label: '健康一男数量' },
+                        { value: '健康一女数量', label: '健康一女数量' },
+                        { value: '健康二男数量', label: '健康二男数量' },
+                        { value: '健康二女数量', label: '健康二女数量' },
+                        { value: '深度男数量', label: '深度男数量' },
+                        { value: '深度女数量', label: '深度女数量' },
+                        { value: '结束时间', label: '结束时间' },
+                        { value: '医生工作时间', label: '医生工作时间' },
+                        { value: '设备使用率', label: '设备使用率' },
+                        { value: '科室负载', label: '科室负载' }
+                      ]}
+                    />
+                    <Select
+                      value={constraint.operator}
+                      onChange={(value) => {
+                        const newConstraints = [...constraints];
+                        newConstraints[index].operator = value;
+                        setConstraints(newConstraints);
+                      }}
+                      options={[
+                        { value: '大于', label: '大于' },
+                        { value: '小于', label: '小于' },
+                        { value: '等于', label: '等于' },
+                        { value: '早于', label: '早于' },
+                        { value: '晚于', label: '晚于' }
+                      ]}
+                    />
+                    <Input
+                      value={constraint.value}
+                      onChange={(e) => {
+                        const newConstraints = [...constraints];
+                        newConstraints[index].value = e.target.value;
+                        setConstraints(newConstraints);
+                      }}
+                    />
+                  </ConstraintRow>
+                ))}
+                <div style={{ marginTop: '12px' }}>
+                  <AddButton onClick={handleAddConstraint}>
+                    <SettingOutlined />
+                    添加约束配置
+                  </AddButton>
+                </div>
+              </Section>
+            </>
+          )}
+
+          <div style={{ marginTop: 24, textAlign: 'right' }}>
+            <Button onClick={onClose} style={{ marginRight: 16 }}>取消</Button>
+            <Button type="primary" onClick={handleRunDecision}>运行决策</Button>
+          </div>
+        </Container>
+
+        {optimizationData.length > 0 && (
+          <OptimizationMonitor data={optimizationData} />
         )}
 
-        <div style={{ marginTop: 24, textAlign: 'right' }}>
-          <Button onClick={onClose} style={{ marginRight: 16 }}>取消</Button>
-          <Button type="primary" onClick={handleRunDecision}>运行决策</Button>
-        </div>
-      </Container>
+        {showSimConfig && (
+          <SimulationConfigPanel
+            visible={showSimConfig}
+            onClose={() => setShowSimConfig(false)}
+          />
+        )}
+      </MainContent>
 
-      {optimizationData.length > 0 && (
-        <OptimizationMonitor data={optimizationData} />
-      )}
-
-      {showSimConfig && (
-        <SimulationConfigPanel
-          visible={showSimConfig}
-          onClose={() => setShowSimConfig(false)}
-        />
-      )}
+      <DecisionMonitor theme={selectedTheme as 'room_optimization' | 'package_optimization' || 'room_optimization'} />
     </PageLayout>
   );
 }

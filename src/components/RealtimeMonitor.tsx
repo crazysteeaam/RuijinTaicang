@@ -5,11 +5,11 @@ import ReactECharts from 'echarts-for-react';
 import RealtimeAnalyticsPanel from './realtime/RealtimeAnalyticsPanel';
 
 const Container = styled.div`
-  width: 400px;
+  width: 450px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 8px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -17,12 +17,12 @@ const Container = styled.div`
 
 const TopCards = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 `;
 
-const LargeCard = styled.div`
-  padding: 20px;
+const MetricCard = styled.div`
+  padding: 6px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
@@ -30,124 +30,104 @@ const LargeCard = styled.div`
 
 const CardTitle = styled.div`
   color: #666;
-  font-size: 16px;
-  margin-bottom: 16px;
+  font-size: 12px;
+  margin-bottom: 4px;
+  white-space: nowrap;
 `;
 
-const LargeValue = styled.div`
+const CardValue = styled.div`
   color: #1f1f1f;
-  font-size: 48px;
+  font-size: 20px;
   font-weight: 500;
   text-align: center;
 `;
 
 const Unit = styled.span`
   color: #666;
-  font-size: 14px;
-  margin-left: 8px;
+  font-size: 12px;
+  margin-left: 2px;
 `;
 
 const ChartCard = styled.div`
-  padding: 20px;
+  padding: 8px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 `;
 
-const TimeList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+const StatsCard = styled(ChartCard)`
+  padding: 8px;
 `;
 
-const TimeItem = styled.div`
-  text-align: center;
-  min-width: 80px;
-`;
-
-const TimeLabel = styled.div`
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 8px;
-  white-space: nowrap;
-`;
-
-const TimeValue = styled.div`
-  color: #1f1f1f;
-  font-size: 18px;
-  font-weight: 500;
-  font-family: monospace;
-`;
-
-const WaitTimeCard = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 20px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
-  .wait-times {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .wait-time-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .wait-time-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-`;
-
-const ServiceList = styled.div`
+const StatsContent = styled.div`
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  flex-direction: column;
+  gap: 6px;
 `;
 
-const ServiceItem = styled.div`
-  text-align: center;
-  flex: 1;
-  min-width: 80px;
-`;
-
-const ServiceLabel = styled.div`
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 4px;
-`;
-
-const ServiceValue = styled.div`
+const SectionTitle = styled.div`
   color: #1f1f1f;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #f0f0f0;
+  }
+`;
+
+const DepartmentGroup = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+`;
+
+const DepartmentColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const DepartmentItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  height: 28px;
+`;
+
+const DepartmentValue = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  min-width: 120px;
+  color: #666;
+`;
+
+const DepartmentBar = styled.div<{ value: number }>`
+  height: 6px;
+  width: ${props => props.value}%;
+  background: ${props => props.color || '#1890ff'};
+  border-radius: 3px;
+  flex: 1;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 8px;
 `;
 
 const MoreButton = styled.button`
   flex: 1;
-  height: 48px;
-  font-size: 16px;
+  height: 40px;
+  font-size: 14px;
   background: white;
   border: 1px solid #e8e8e8;
   border-radius: 4px;
@@ -155,7 +135,7 @@ const MoreButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   color: #1f1f1f;
 
   &:hover {
@@ -163,196 +143,232 @@ const MoreButton = styled.button`
   }
 `;
 
+const StatusItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 4px;
+`;
+
+const StatusTitle = styled.div`
+  color: #1f1f1f;
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+const StatusValue = styled.div<{ color?: string }>`
+  color: ${props => props.color || '#1f1f1f'};
+  font-size: 20px;
+  font-weight: 500;
+`;
+
+const StatusDesc = styled.div`
+  color: #666;
+  font-size: 11px;
+`;
+
 export default function RealtimeMonitor() {
   const [showAnalytics, setShowAnalytics] = useState(false);
 
-  const utilizationChartOption = {
-    grid: {
-      top: 30,
-      right: 8,
-      bottom: 24,
-      left: 24
+  // 体检时间分布图表配置
+  const timeDistributionChartOption = {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c}分钟 ({d}%)'
     },
-    xAxis: {
-      type: 'category',
-      data: ['8:00', '10:00', '12:00', '14:00', '16:00'],
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { color: '#999' }
+    legend: {
+      orient: 'horizontal',
+      bottom: 10,
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { fontSize: 12 }
     },
-    yAxis: {
-      type: 'value',
-      min: 0,
-      max: 100,
-      interval: 20,
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: {
-        lineStyle: { color: '#f0f0f0' }
-      },
-      axisLabel: {
-        color: '#999',
-        formatter: '{value}%'
-      }
-    },
-    series: [{
-      data: [15, 18, 15, 12, 18],
-      type: 'bar',
-      barWidth: 16,
-      itemStyle: {
-        color: '#52c41a'
-      }
-    }]
-  };
-
-  const gaugeChartOption = {
-    series: [{
-      type: 'gauge',
-      startAngle: 180,
-      endAngle: 0,
-      min: 0,
-      max: 100,
-      splitNumber: 8,
-      axisLine: {
-        lineStyle: {
-          width: 6,
-          color: [
-            [0.3, '#91d5ff'],
-            [0.7, '#faad14'],
-            [1, '#ff4d4f']
-          ]
-        }
-      },
-      pointer: {
-        icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
-        length: '12%',
-        width: 20,
-        offsetCenter: [0, '-60%'],
+    series: [
+      {
+        type: 'pie',
+        radius: ['50%', '70%'],
+        center: ['50%', '40%'],
+        avoidLabelOverlap: false,
         itemStyle: {
-          color: 'auto'
-        }
-      },
-      axisTick: {
-        length: 12,
-        lineStyle: {
-          color: 'auto',
-          width: 2
-        }
-      },
-      splitLine: {
-        length: 20,
-        lineStyle: {
-          color: 'auto',
-          width: 3
-        }
-      },
-      axisLabel: {
-        color: '#666',
-        fontSize: 12,
-        distance: -60
-      },
-      title: {
-        offsetCenter: [0, '-20%'],
-        fontSize: 20
-      },
-      detail: {
-        fontSize: 30,
-        offsetCenter: [0, '0%'],
-        valueAnimation: true,
-        formatter: function (value: number) {
-          return value + '%';
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
         },
-        color: 'auto'
-      },
-      data: [{
-        value: 68
-      }]
-    }]
+        label: { show: false },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 14,
+            fontWeight: 'bold'
+          }
+        },
+        data: [
+          { value: 45, name: '检查时间', itemStyle: { color: '#1890ff' } },
+          { value: 32, name: '等待时间', itemStyle: { color: '#ff4d4f' } },
+          { value: 15, name: '走路时间', itemStyle: { color: '#52c41a' } },
+          { value: 8, name: '其他时间', itemStyle: { color: '#faad14' } }
+        ]
+      }
+    ]
   };
 
   return (
     <Container>
       <TopCards>
-        <LargeCard>
-          <CardTitle>单位时间处理人数</CardTitle>
-          <LargeValue>120<Unit>人/秒</Unit></LargeValue>
-        </LargeCard>
-        <LargeCard>
+        <MetricCard>
+          <CardTitle>当前体检人数</CardTitle>
+          <CardValue>535<Unit>人</Unit></CardValue>
+        </MetricCard>
+        <MetricCard>
+          <CardTitle>单位时间处理</CardTitle>
+          <CardValue>120<Unit>人/秒</Unit></CardValue>
+        </MetricCard>
+        <MetricCard>
           <CardTitle>当前等待人数</CardTitle>
-          <LargeValue>225<Unit>人</Unit></LargeValue>
-        </LargeCard>
+          <CardValue>225<Unit>人</Unit></CardValue>
+        </MetricCard>
+        <MetricCard>
+          <CardTitle>平均等待时长</CardTitle>
+          <CardValue>185<Unit>分钟</Unit></CardValue>
+        </MetricCard>
       </TopCards>
 
+      <StatsCard>
+        <SectionTitle>实时运营状态</SectionTitle>
+        <StatsContent>
+          <DepartmentGroup style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <StatusItem>
+              <StatusTitle>检验科</StatusTitle>
+              <StatusValue color="#1890ff">85%</StatusValue>
+              <StatusDesc>高峰期 • 8人等待 • 预计等待12分钟</StatusDesc>
+            </StatusItem>
+            <StatusItem>
+              <StatusTitle>影像科</StatusTitle>
+              <StatusValue color="#ff4d4f">95%</StatusValue>
+              <StatusDesc>超负荷 • 15人等待 • 预计等待30分钟</StatusDesc>
+            </StatusItem>
+            <StatusItem>
+              <StatusTitle>临床科</StatusTitle>
+              <StatusValue color="#52c41a">60%</StatusValue>
+              <StatusDesc>正常 • 3人等待 • 预计等待5分钟</StatusDesc>
+            </StatusItem>
+          </DepartmentGroup>
+        </StatsContent>
+      </StatsCard>
+
+      <StatsCard>
+        <SectionTitle>实时科室数据</SectionTitle>
+        <StatsContent>
+          <DepartmentGroup>
+            <DepartmentColumn>
+              <DepartmentItem>
+                <span>血检</span>
+                <DepartmentValue>
+                  <DepartmentBar value={90} color="#1890ff" />
+                  220人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>尿检</span>
+                <DepartmentValue>
+                  <DepartmentBar value={80} color="#1890ff" />
+                  195人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>心电图</span>
+                <DepartmentValue>
+                  <DepartmentBar value={85} color="#52c41a" />
+                  210人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>超声检查</span>
+                <DepartmentValue>
+                  <DepartmentBar value={50} color="#52c41a" />
+                  120人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>CT检查</span>
+                <DepartmentValue>
+                  <DepartmentBar value={35} color="#52c41a" />
+                  89人
+                </DepartmentValue>
+              </DepartmentItem>
+            </DepartmentColumn>
+            <DepartmentColumn>
+              <DepartmentItem>
+                <span>内科</span>
+                <DepartmentValue>
+                  <DepartmentBar value={90} color="#faad14" />
+                  220人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>外科</span>
+                <DepartmentValue>
+                  <DepartmentBar value={75} color="#faad14" />
+                  180人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>眼科</span>
+                <DepartmentValue>
+                  <DepartmentBar value={60} color="#faad14" />
+                  150人
+                </DepartmentValue>
+              </DepartmentItem>
+              <DepartmentItem>
+                <span>五官科</span>
+                <DepartmentValue>
+                  <DepartmentBar value={65} color="#faad14" />
+                  160人
+                </DepartmentValue>
+              </DepartmentItem>
+            </DepartmentColumn>
+          </DepartmentGroup>
+        </StatsContent>
+      </StatsCard>
+
       <ChartCard>
-        <CardTitle>诊室利用率</CardTitle>
-        <ReactECharts option={utilizationChartOption} style={{ height: '200px' }} />
+        <CardTitle>体检时间分布</CardTitle>
+        <ReactECharts option={timeDistributionChartOption} style={{ height: 200 }} />
       </ChartCard>
 
-      <TimeList>
-        <TimeItem>
-          <TimeLabel>心电图</TimeLabel>
-          <TimeValue>13:32:04</TimeValue>
-        </TimeItem>
-        <TimeItem>
-          <TimeLabel>超声检查</TimeLabel>
-          <TimeValue>14:32:04</TimeValue>
-        </TimeItem>
-        <TimeItem>
-          <TimeLabel>CT检查</TimeLabel>
-          <TimeValue>16:32:04</TimeValue>
-        </TimeItem>
-        <TimeItem>
-          <TimeLabel>血检</TimeLabel>
-          <TimeValue>18:32:04</TimeValue>
-        </TimeItem>
-      </TimeList>
-
-      <WaitTimeCard>
-        <div className="wait-times">
-          <TimeLabel>平均等待时长</TimeLabel>
-          <div className="wait-time-list">
-            <div className="wait-time-item">
-              <TimeLabel>心电图</TimeLabel>
-              <TimeValue>00:32:04</TimeValue>
+      <StatsCard>
+        <SectionTitle>经营管理化建议</SectionTitle>
+        <StatsContent>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ 
+              padding: '12px', 
+              background: 'rgba(255, 77, 79, 0.1)', 
+              borderRadius: '4px',
+              fontSize: '13px',
+              color: '#ff4d4f'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 600 }}>区域拥堵：</span>
+                <span>超声检查区域排队拥堵过长，建议分流至CT区域，需要优化人员配置</span>
+              </div>
             </div>
-            <div className="wait-time-item">
-              <TimeLabel>超声检查</TimeLabel>
-              <TimeValue>00:55:00</TimeValue>
-            </div>
-            <div className="wait-time-item">
-              <TimeLabel>CT检查</TimeLabel>
-              <TimeValue>00:32:04</TimeValue>
+            <div style={{ 
+              padding: '12px', 
+              background: 'rgba(24, 144, 255, 0.1)', 
+              borderRadius: '4px',
+              fontSize: '13px',
+              color: '#1890ff'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 600 }}>流程优化：</span>
+                <span>心电图诊室利用率过高，建议进行流程优化</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div>
-          <TimeLabel>走路时间占比</TimeLabel>
-          <ReactECharts option={gaugeChartOption} style={{ height: '180px' }} />
-        </div>
-      </WaitTimeCard>
-
-      <ServiceList>
-        <ServiceItem>
-          <ServiceLabel>心电图</ServiceLabel>
-          <ServiceValue>210人</ServiceValue>
-        </ServiceItem>
-        <ServiceItem>
-          <ServiceLabel>超声检查</ServiceLabel>
-          <ServiceValue>120人</ServiceValue>
-        </ServiceItem>
-        <ServiceItem>
-          <ServiceLabel>CT检查</ServiceLabel>
-          <ServiceValue>89人</ServiceValue>
-        </ServiceItem>
-        <ServiceItem>
-          <ServiceLabel>血检</ServiceLabel>
-          <ServiceValue>220人</ServiceValue>
-        </ServiceItem>
-        <ServiceItem>
-          <ServiceLabel>内科</ServiceLabel>
-          <ServiceValue>220人</ServiceValue>
-        </ServiceItem>
-      </ServiceList>
+        </StatsContent>
+      </StatsCard>
 
       <ButtonGroup>
         <MoreButton onClick={() => setShowAnalytics(true)}>

@@ -231,7 +231,7 @@ export default function Home() {
           top: 24,
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 2,
+          zIndex: 2000,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -463,7 +463,7 @@ export default function Home() {
           </div>
         ) : currentMode === 'optimize' ? (
           <div style={{ position: 'absolute', top: 24, right: 24, zIndex: 1 }}>
-            <DecisionMonitor />
+            {/* <DecisionMonitor /> */}
           </div>
         ) : currentMode === 'realtime' && currentView === 'management' ? (
           <div style={{ position: 'absolute', top: 24, right: 24, zIndex: 100 }}>
