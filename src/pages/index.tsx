@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Layout, Button, InputNumber, DatePicker, Slider, message } from 'antd';
-import { SettingOutlined, BulbOutlined, PlayCircleOutlined, PauseCircleOutlined, UndoOutlined, ForwardOutlined } from '@ant-design/icons';
+import { Layout, Button, Slider, message } from 'antd';
+import { PlayCircleOutlined, PauseCircleOutlined, UndoOutlined, ForwardOutlined } from '@ant-design/icons';
 import ConfigPanel from '../components/ConfigPanel';
 import DataMonitor from '../components/DataMonitor';
 import BackgroundImage from '../components/BackgroundImage';
 import ModeSelector from '../components/ModeSelector';
 import RoomLabels from '../components/RoomLabels';
-import SimulationConfigPanel from '../components/SimulationConfigPanel';
 import DecisionConfig from '../components/DecisionConfig';
-import DecisionMonitor from '../components/DecisionMonitor';
 import PatientPerspective from '../components/realtime/PatientPerspective';
 import DoctorPerspective from '../components/realtime/DoctorPerspective';
 import ManagementPerspective from '../components/realtime/ManagementPerspective';
@@ -20,6 +18,9 @@ import styled from 'styled-components';
 import HistoryDatePicker from '../components/history/HistoryDatePicker';
 import HistoryAnalyticsPanel from '../components/history/HistoryAnalyticsPanel';
 import TemplateConfig from '../components/TemplateConfig';
+import SimulationGlobalConfig from '../components/SimulationGlobalConfig';
+import SimulationConfigCards from '../components/SimulationConfigCards';
+import SimulationConfigButton from '../components/SimulationConfigButton';
 
 const { Content } = Layout;
 
@@ -107,10 +108,36 @@ const LeftSidebar = styled.div<{ visible: boolean }>`
   transition: opacity 0.3s ease;
 `;
 
+// 定义配置数据类型
+interface ConfigDataType {
+  appointment?: {
+    timeSlots: any[];
+    [key: string]: any;
+  };
+  process?: {
+    priorityStrategy: string;
+    priorityItems: string[];
+    [key: string]: any;
+  };
+  resource?: {
+    staffGroups: any[];
+    [key: string]: any;
+  };
+  business?: {
+    packages: any[];
+    [key: string]: any;
+  };
+  cost?: {
+    fixedCost: number;
+    profitRates: any[];
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 export default function Home() {
   const [currentMode, setCurrentMode] = useState<Mode>('simulate');
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
-  const [configVisible, setConfigVisible] = useState(false);
   const [currentView, setCurrentView] = useState<ViewType>('patient');
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<dayjs.Dayjs | null>(null);
   const [historyProgress, setHistoryProgress] = useState(0);
@@ -121,6 +148,9 @@ export default function Home() {
     duration: 24000
   });
   const templateConfigRef = useRef<React.ElementRef<typeof TemplateConfig>>(null);
+  const [configVisible, setConfigVisible] = useState(false);
+  const [configCompleted, setConfigCompleted] = useState(false);
+  const [configData, setConfigData] = useState<ConfigDataType>({});
 
   useEffect(() => {
     document.title = '瑞金太仓健康管理';
@@ -222,6 +252,20 @@ export default function Home() {
     setSimulationConfig(config);
   };
 
+  const handleConfigChange = (configType: string, config: Record<string, any>) => {
+    console.log(`Config changed: ${configType}`, config);
+    // 更新配置数据
+    setConfigData((prev: ConfigDataType) => ({
+      ...prev,
+      [configType]: config
+    }));
+  };
+
+  const handleConfigCompletionChange = (isCompleted: boolean, data: ConfigDataType) => {
+    setConfigCompleted(isCompleted);
+    setConfigData(data);
+  };
+
   return (
     <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
       <Content style={{ position: 'relative', overflow: 'hidden' }}>
@@ -317,142 +361,32 @@ export default function Home() {
 
           {currentMode === 'simulate' && (
             <>
-              <Button 
-                icon={<SettingOutlined />}
-                onClick={() => setConfigVisible(true)}
-                style={{
-                  background: 'white',
-                  border: '1px solid #e8e8e8',
-                  borderRadius: '4px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  height: '40px',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  zIndex: 11
-                }}
-              >
-                模拟参数配置
-              </Button>
+              {/* <SimulationConfigButton 
+                onClick={() => setConfigVisible(true)} 
+                isCompleted={configCompleted}
+                configData={configData}
+              /> */}
+              <SimulationGlobalConfig 
+                config={simulationConfig}
+                onConfigChange={setSimulationConfig}
+              />
+              
+              <SimulationConfigCards 
+                onConfigChange={handleConfigChange}
+                onCompletionChange={handleConfigCompletionChange}
+              />
 
-              <div style={{
-                background: '#fff',
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                width: 360,
-                padding: '20px'
-              }}>
-                <h3 style={{ 
-                  marginBottom: '20px',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#1f1f1f'
-                }}>
-                  门诊场景推演全局配置项
-                </h3>
-                <div style={{ 
-                  marginBottom: '24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px'
-                }}>
-                  <div>
-                    <div style={{ 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: '#666'
-                    }}>
-                      推演速度
-                    </div>
-                    <InputNumber
-                      style={{ width: '100%' }}
-                      min={1}
-                      max={10000}
-                      value={simulationConfig.speed}
-                      onChange={(value) => setSimulationConfig(prev => ({ ...prev, speed: value || 1000 }))}
-                    />
-                  </div>
-                  <div>
-                    <div style={{ 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: '#666'
-                    }}>
-                      开始时间
-                    </div>
-                    <DatePicker
-                      showTime
-                      style={{ width: '100%' }}
-                      value={dayjs(simulationConfig.startTime)}
-                      onChange={(date) => setSimulationConfig(prev => ({ 
-                        ...prev, 
-                        startTime: date?.format('YYYY-MM-DD HH:mm:ss') || prev.startTime 
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <div style={{ 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: '#666'
-                    }}>
-                      推演时长（秒）
-                    </div>
-                    <InputNumber
-                      style={{ width: '100%' }}
-                      min={1}
-                      max={86400}
-                      value={simulationConfig.duration}
-                      onChange={(value) => setSimulationConfig(prev => ({ ...prev, duration: value || 24000 }))}
-                    />
-                  </div>
-                </div>
-                {/* <h3 style={{ 
-                  marginBottom: '16px',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#1f1f1f',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <BulbOutlined style={{ color: '#faad14' }} />
-                  经营管理化建议
-                </h3> */}
-                {/* <div style={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    padding: '12px 16px',
-                    background: '#fff7e6',
-                    border: '1px solid #ffd591',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    color: '#d46b08',
-                    lineHeight: '1.5'
-                  }}>
-                    <strong style={{ color: '#d48806' }}>区域拥堵：</strong>
-                    XX区域排队拥堵过长，建议分流至XX区域，需要优化人员配置
-                  </div>
-                  <div style={{
-                    padding: '12px 16px',
-                    background: '#e6f7ff',
-                    border: '1px solid #91d5ff',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    color: '#096dd9',
-                    lineHeight: '1.5'
-                  }}>
-                    <strong style={{ color: '#0050b3' }}>流程优化：</strong>
-                    XX诊室利用XX分钟就诊时间过长，建议进行流程优化
-                  </div>
-                </div> */}
-              </div>
+              
             </>
           )}
           {currentMode === 'optimize' && (
-            <DecisionConfig />
+            <DecisionConfig 
+              onClose={() => setCurrentMode('simulate')} 
+              onStart={(config) => {
+                console.log('Starting optimization with config:', config);
+                // 这里可以添加优化逻辑
+              }} 
+            />
           )}
         </div>
         
@@ -530,12 +464,6 @@ export default function Home() {
             </div>
           </div>
         )}
-
-        {/* 模拟参数配置面板 */}
-        <SimulationConfigPanel
-          visible={configVisible}
-          onClose={() => setConfigVisible(false)}
-        />
 
         {/* 视角切换器 - 仅在实时模式下显示 */}
         {currentMode === 'realtime' && (
